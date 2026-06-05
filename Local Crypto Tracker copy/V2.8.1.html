@@ -1,0 +1,6935 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+  <title>Local Crypto Portfolio Tracker</title>
+  <script src="chart.umd.min.js"></script>
+
+<link rel="stylesheet" href="flatpickr.min.css">
+<script src="flatpickr.min.js"></script>
+
+<script src="historical-prices/kas-prices.js"></script>
+<script src="historical-prices/btc-prices.js"></script>
+<script src="historical-prices/eth-prices.js"></script>
+<script src="historical-prices/sol-prices.js"></script>
+<script src="historical-prices/xmr-prices.js"></script>
+<script src="historical-prices/ltc-prices.js"></script>
+<script src="historical-prices/zec-prices.js"></script>
+<script src="historical-prices/bch-prices.js"></script>
+<script src="historical-prices/bsv-prices.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      background: #121520;
+      color: #f4f6ff;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", Arial, sans-serif;
+    }
+
+.txRow {
+  cursor: pointer;
+}
+
+.txRow:hover {
+  background: rgba(255,255,255,0.03);
+}
+
+    .app {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 28px;
+    }
+
+    h1 {
+      font-size: 46px;
+      margin: 0;
+      letter-spacing: -1px;
+    }
+
+    .sub {
+      color: #8f96aa;
+      margin-top: 8px;
+      font-size: 18px;
+    }
+
+    .priceBox {
+      text-align: right;
+      font-size: 16px;
+      color: #9ca3b7;
+    }
+
+    .price {
+      font-size: 30px;
+      color: white;
+      font-weight: 800;
+    }
+
+    .marketCapSub {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+   .green { color: var(--positive); }
+   .red { color: var(--negative); }
+
+   .tabs {
+  display: flex;
+  gap: 38px;
+  border-bottom: 1px solid #2b3041;
+  margin-top: -70px;
+  margin-bottom: 26px;
+}
+
+    .tab {
+  padding: 10px 14px 15px 14px;
+  font-size: 25px;
+  color: #8f96aa;
+  cursor: pointer;
+  border-radius: 12px 12px 0 0;
+  transition: background 0.15s ease, transform 0.12s ease, color 0.15s ease;
+  user-select: none;
+   }
+
+    .tab:hover {
+  background: rgba(255,255,255,0.07);
+  color: white;
+  transform: translateY(-1px);
+  }
+
+    .tab:active {
+  transform: scale(0.96);
+  }
+
+    .tab.active {
+      color: white;
+      font-weight: 800;
+      border-bottom: 4px solid #3867ff;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, #1b2030, #171b29);
+      border: 1px solid #2a3042;
+      border-radius: 16px;
+      box-shadow: 0 14px 35px rgba(0,0,0,.25);
+    }
+
+    .panel {
+      padding: 22px;
+      margin-bottom: 22px;
+    }
+
+    .panelHead {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .pillRow {
+      display: flex;
+      gap: 8px;
+    }
+
+    .pill {
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.07);
+  color: #b9bfd0;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: background 0.15s ease, transform 0.12s ease, color 0.15s ease, border 0.15s ease;
+  user-select: none;
+}
+
+.pill:hover {
+  background: rgba(255,255,255,0.13);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.pill:active,
+.page:active {
+  transform: scale(0.96);
+}
+
+.pill.active {
+  background: linear-gradient(180deg, #4767ff, #3457ff);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 8px 22px rgba(52,87,255,0.30);
+}
+.pill.active:hover {
+  transform: translateY(0);
+}
+
+    canvas {
+      max-height: 380px;
+    }
+
+.chartDateRow {
+  display: flex;
+  justify-content: space-between;
+  color: #8f96aa;
+  font-size: 15px;
+  font-weight: 700;
+  margin-top: -10px;
+  padding: 0 8px;
+}
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+    }
+
+    th {
+      color: #9aa2b8;
+      font-weight: 600;
+      text-align: left;
+      padding: 14px;
+      border-bottom: 1px solid #2c3346;
+    }
+
+    td {
+      padding: 15px 14px;
+      border-bottom: 1px solid #242a3a;
+      color: #e7eaff;
+    }
+
+.chartLock {
+  padding: 10px 13px;
+}
+
+.chartLock svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+  stroke-width: 2.4;
+}
+
+  .mainBalance {
+  margin: 10px 0 28px 0;
+  padding: 8px 2px 4px 2px;
+   }
+
+  .bigUsd {
+  font-size: 50px;
+  font-weight: 900;
+  letter-spacing: -2px;
+  color: #ffffff;
+  }
+
+  .dayChange {
+  margin-top: 8px;
+  font-size: 24px;
+  font-weight: 750;
+  }
+
+  .dayChange.green {
+  color: var(--positive);
+}
+
+.dayChange.red {
+  color: var(--negative);
+}
+
+    .coin {
+      display: inline-flex;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      align-items: center;
+      justify-content: center;
+      background: #77e0cc;
+      color: #111520;
+      font-weight: 900;
+      margin-right: 10px;
+    }
+
+.coinLogoFrame {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  margin-right: 12px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  vertical-align: middle;
+  overflow: visible;
+}
+
+.coinLogoImg {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  object-fit: cover;
+  display: block;
+  border-radius: 50%;
+  transform-origin: center center;
+}
+
+.coinTxType {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  min-height: 34px;
+}
+  .searchBar {
+  background: #101420;
+  border: 1px solid #2b3041;
+  color: #aab2c8;
+  padding: 13px 16px;
+  border-radius: 12px;
+  min-width: 260px;
+  margin-bottom: 18px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.searchBar::placeholder {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+    .footerPages {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 20px;
+      color: #9aa2b8;
+    }
+
+   .page {
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.07);
+  color: #b9bfd0;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: background 0.15s ease, transform 0.12s ease, color 0.15s ease, border 0.15s ease;
+  user-select: none;
+}
+
+.page:hover {
+  background: rgba(255,255,255,0.13);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.page.active {
+  background: linear-gradient(180deg, #4767ff, #3457ff);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 8px 22px rgba(52,87,255,0.30);
+}
+
+#editModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(5,8,15,0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+#editCoinsModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(5,8,15,0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 10075;
+}
+
+.coinEditRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  border-radius: 16px;
+  background: var(--softButton);
+  border: 1px solid var(--softBorder);
+}
+
+.coinEditInfo {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.coinEditText {
+  min-width: 0;
+}
+
+.coinEditSymbol {
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--text);
+}
+
+.coinEditName {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.coinEditButton {
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--softBorder);
+  background: var(--softButton);
+  color: var(--text);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.coinEditButton:hover {
+  background: var(--accent);
+  color: white;
+}
+
+.coinEditActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.coinDeleteButton {
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,77,99,0.28);
+  background: rgba(255,77,99,0.13);
+  color: #ff4d63;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.coinDeleteButton:hover {
+  background: rgba(255,77,99,0.22);
+  color: #ff6b7d;
+}
+
+#addCoinLogoScale {
+  font-size: 18px;
+}
+
+.modalCard {
+  width: 420px;
+  max-width: 92%;
+  background: linear-gradient(180deg, #1b2030, #171b29);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 28px;
+  padding: 26px;
+  box-shadow: 0 28px 80px rgba(0,0,0,0.55);
+}
+
+.modalCard h2 {
+  margin-top: 0;
+  margin-bottom: 24px;
+  font-size: 34px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+
+.modalCard label {
+  display: block;
+  margin-top: 14px;
+  margin-bottom: 8px;
+  color: #8f96aa;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.modalCard input,
+.modalCard select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(16,20,32,0.92);
+  color: white;
+  font-weight: 700;
+  outline: none;
+}
+
+#editCoin {
+  appearance: none;
+  -webkit-appearance: none;
+
+  width: 100%;
+  box-sizing: border-box;
+
+  padding: 14px 46px 14px 16px;
+  border-radius: 16px;
+
+  background:
+    linear-gradient(180deg, var(--inputBg), var(--inputBg)),
+    linear-gradient(180deg, var(--softButton), var(--softButton));
+
+  border: 1px solid var(--panelBorder);
+
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 700;
+
+  outline: none;
+  cursor: pointer;
+
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+
+  background-position:
+    calc(100% - 22px) 50%,
+    calc(100% - 15px) 50%;
+
+  background-size:
+    7px 7px,
+    7px 7px;
+
+  background-repeat: no-repeat;
+}
+
+#editCoin:hover {
+  border-color: var(--softBorder);
+  background-color: var(--inputBg);
+}
+
+#editCoin:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+#editCoin option {
+  background: var(--panel1);
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.modalCard input:focus,
+.modalCard select:focus {
+  border-color: rgba(71,103,255,0.75);
+  box-shadow: 0 0 0 3px rgba(71,103,255,0.18);
+}
+
+.modalButtons {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.modalButtons button {
+  flex: 1;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.07);
+  color: #b9bfd0;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: background 0.15s ease,
+              transform 0.12s ease,
+              color 0.15s ease,
+              border 0.15s ease;
+}
+
+.modalButtons button:hover {
+  background: rgba(255,255,255,0.13);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.modalButtons button:active {
+  transform: scale(0.96);
+}
+
+#addCoinModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(5,8,15,0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 10080;
+}
+
+#saveAddCoin {
+  background: linear-gradient(180deg, var(--accent), var(--accent));
+  color: white;
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+#addCoinSymbol,
+#addCoinName,
+#addCoinGeckoId,
+#addCoinPaprikaId {
+  font-size: 18px;
+}
+
+#addCoinLogoInput,
+#addCoinCsvInput {
+  font-size: 14px;
+  cursor: pointer;
+}
+
+#appPopupMessage {
+  white-space: pre-line;
+}
+
+#saveTx {
+  background: linear-gradient(180deg, #4767ff, #3457ff);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 8px 22px rgba(52,87,255,0.30);
+}
+
+#cancelTx {
+  background: rgba(255,255,255,0.07);
+  color: #b9bfd0;
+}
+
+#cancelTx:hover {
+  background: rgba(255,255,255,0.13);
+  color: white;
+}
+
+#deleteTx {
+  background: linear-gradient(180deg, #ff4d63, #e63b53);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 8px 22px rgba(255,77,99,0.30);
+}
+
+#deleteTx:hover {
+  background: linear-gradient(180deg, #ff4d63, #e63b53);
+  color: white;
+}
+
+#deleteConfirmModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(5,8,15,0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+#typeChangeConfirmModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(5,8,15,0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 10001;
+}
+
+#confirmDeleteTx {
+  background: rgba(255,77,99,0.13);
+  color: #ff4d63;
+  border: 1px solid rgba(255,77,99,0.28);
+}
+
+#confirmDeleteTx:hover {
+  background: rgba(255,77,99,0.22);
+  color: #ff6b7d;
+}
+
+.modalCard input[type="number"]::-webkit-outer-spin-button,
+.modalCard input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.modalCard input[type="number"] {
+  appearance: textfield;
+}
+
+.flatpickr-calendar {
+  background: #1b2030 !important;
+  border: 1px solid #2a3042 !important;
+  border-radius: 18px !important;
+  box-shadow: 0 20px 60px rgba(0,0,0,.45) !important;
+}
+
+.flatpickr-months .flatpickr-month,
+.flatpickr-current-month,
+.flatpickr-weekdays,
+.flatpickr-weekday,
+.flatpickr-day {
+  color: white !important;
+}
+
+.flatpickr-weekday {
+  color: #8f96aa !important;
+}
+
+.flatpickr-day:hover {
+  background: rgba(71,103,255,.18) !important;
+}
+
+.flatpickr-day.selected {
+  background: #4767ff !important;
+  border-color: #4767ff !important;
+}
+
+.flatpickr-monthDropdown-months,
+.numInput {
+  color: white !important;
+  background: transparent !important;
+}
+
+.flatpickr-prev-month,
+.flatpickr-next-month {
+  fill: white !important;
+}
+
+.flatpickr-monthDropdown-months {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background: #242a3a !important;
+  color: #f4f6ff !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  border-radius: 10px !important;
+  padding: 4px 26px 4px 10px !important;
+  font-weight: 800 !important;
+  box-shadow: none !important;
+}
+
+.flatpickr-current-month .numInputWrapper {
+  background: #242a3a !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+}
+
+.flatpickr-current-month input.cur-year {
+  color: #f4f6ff !important;
+  font-weight: 800 !important;
+  box-shadow: none !important;
+}
+
+.flatpickr-monthDropdown-months {
+  width: 130px !important;
+}
+
+.flatpickr-current-month {
+  padding-top: 3px !important;
+}
+
+.flatpickr-current-month .numInputWrapper span {
+  display: none !important;
+}
+
+.themeMenuWrap {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+
+
+.apiStatusBox {
+  margin-top: 8px;
+  padding: 9px 11px;
+  border-radius: 14px;
+  border: 1px solid var(--softBorder, rgba(255,255,255,0.10));
+  background: var(--softButton, rgba(255,255,255,0.07));
+  color: var(--muted, #8f96aa);
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.35;
+  text-align: right;
+  min-width: 210px;
+  max-width: 280px;
+}
+
+.apiStatusBox strong {
+  color: var(--text, #f4f6ff);
+  font-weight: 900;
+}
+
+.apiStatusOk { color: var(--positive, #16d18a); }
+.apiStatusWarn { color: #f0b84f; }
+.apiStatusBad { color: var(--negative, #ff4d63); }
+
+.apiStatusLog {
+  margin-top: 7px;
+  padding-top: 7px;
+  border-top: 1px solid var(--softBorder, rgba(255,255,255,0.10));
+  font-size: 10px;
+  line-height: 1.28;
+  font-weight: 650;
+  opacity: 0.9;
+  max-height: 92px;
+  overflow: hidden;
+}
+
+.themeToggle {
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.07);
+  color: #f4f6ff;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.08);
+  user-select: none;
+  transition: background 0.15s ease, transform 0.12s ease, color 0.15s ease;
+}
+
+.themeToggle:hover {
+  background: rgba(255,255,255,0.13);
+  transform: translateY(-1px);
+}
+
+.themeToggle:active {
+  transform: scale(0.96);
+}
+
+.themeDropdown {
+  position: absolute;
+  top: 44px;
+  right: 0;
+ min-width: 115px;
+ width: fit-content;
+  background: linear-gradient(180deg, #1b2030, #171b29);
+  border: 1px solid #2a3042;
+  border-radius: 14px;
+  box-shadow: 0 16px 45px rgba(0,0,0,0.42);
+  padding: 6px;
+  display: none;
+  z-index: 1000;
+}
+
+.themeDropdown.open {
+  display: block;
+}
+
+.themeOption {
+  padding: 8px 10px;
+  border-radius: 10px;
+  color: #b9bfd0;
+  font-weight: 800;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s ease, transform 0.12s ease, color 0.15s ease;
+}
+
+.themeOption:hover {
+  background: rgba(255,255,255,0.09);
+  color: white;
+}
+
+.themeOption:active {
+  transform: scale(0.96);
+}
+
+.themeOption.active {
+  background: rgba(255,255,255,0.09);
+  color: white;
+  box-shadow: none;
+}
+
+.themeOption {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+}
+
+.themeOption,
+.themeOption.active,
+.themeOption:hover {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.themeOption:hover {
+  color: var(--text) !important;
+}
+
+.themeIcon {
+  width: 18px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.sunIcon {
+  font-size: 1.35em;
+}
+
+body[data-theme="dark"] {
+  --positive: #16d18a;
+  --negative: #ff4d63;
+  --bg: #121520;
+  --text: #f4f6ff;
+  --muted: #8f96aa;
+  --panel1: #1b2030;
+  --panel2: #171b29;
+  --panelBorder: #2a3042;
+  --softBorder: rgba(255,255,255,0.10);
+  --softButton: rgba(255,255,255,0.07);
+  --softButtonHover: rgba(255,255,255,0.13);
+  --tableBorder: #242a3a;
+  --inputBg: #101420;
+  --chartLine: #16d18a;
+  --chartFill: rgba(22, 209, 138, 0.18);
+  --accent: #4767ff;
+  --shadow: rgba(0,0,0,0.45);
+}
+
+body[data-theme="light"] {
+  --positive: #168a56;
+  --negative: #d92d3d;
+  --bg: #f4f6fb;
+  --text: #121520;
+  --muted: #667085;
+  --panel1: #ffffff;
+  --panel2: #f8faff;
+  --panelBorder: #d9deea;
+  --softBorder: rgba(18,21,32,0.10);
+  --softButton: rgba(18,21,32,0.06);
+  --softButtonHover: rgba(18,21,32,0.11);
+  --tableBorder: #e3e7f0;
+  --inputBg: #ffffff;
+  --chartLine: #3457ff;
+  --chartFill: rgba(52,87,255,0.14);
+  --accent: #3457ff;
+  --shadow: rgba(20,30,55,0.14);
+}
+
+body[data-theme="red"] {
+  --bg: #080303;
+  --text: #ff4040;
+  --muted: #ff4040;
+  --panel1: #160707;
+  --panel2: #100404;
+  --panelBorder: #6f1f1a;
+  --softBorder: rgba(255,75,45,0.22);
+  --softButton: rgba(255,60,35,0.10);
+  --softButtonHover: rgba(255,60,35,0.18);
+  --tableBorder: #4a1714;
+  --inputBg: #0b0303;
+  --chartLine: #ff4040;
+  --chartFill: rgba(255,64,64,0.22);
+  --accent: #ff4040;
+  --shadow: rgba(0,0,0,0.60);
+  --positive: #ff4040;
+  --negative: #ff4040;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.sub,
+.priceBox,
+.tab,
+.searchBar,
+.footerPages,
+th,
+.chartDateRow,
+.flatpickr-weekday {
+  color: var(--muted) !important;
+}
+
+.price,
+.bigUsd,
+h1,
+h2,
+.flatpickr-current-month,
+.flatpickr-day {
+  color: var(--text) !important;
+}
+
+.panel,
+.modalCard,
+.themeDropdown {
+  background: linear-gradient(180deg, var(--panel1), var(--panel2)) !important;
+  border-color: var(--panelBorder) !important;
+  box-shadow: 0 14px 35px var(--shadow) !important;
+}
+
+.settingsMiniInfo {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-top: 18px;
+  margin-bottom: 22px;
+}
+
+.settingsMiniInfo > div {
+  background: rgba(255,255,255,0.025);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px 18px;
+}
+
+.settingsMiniInfo span {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.settingsMiniInfo strong {
+  display: block;
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: -0.2px;
+}
+
+#settingsView .settingsSection {
+  border-top: 1px solid var(--border);
+  padding-top: 26px;
+  margin-top: 26px;
+}
+
+#settingsView .settingsSection:first-of-type {
+  margin-top: 28px;
+}
+
+#settingsView .settingsActions {
+  margin-top: 0;
+}
+
+.settingsSection {
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px solid var(--panelBorder);
+}
+
+.settingsSection:first-of-type {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.settingsSection h3 {
+  margin: 0 0 18px 0;
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--text);
+}
+
+.settingsActions {
+  margin-top: 20px;
+}
+
+.tabs {
+  border-bottom-color: var(--panelBorder);
+}
+
+.tab:hover,
+.pill:hover,
+.page:hover,
+.themeToggle:hover,
+.themeOption:hover,
+.modalButtons button:hover,
+#cancelTx:hover {
+  background: var(--softButtonHover);
+}
+
+.tab.active {
+  border-bottom-color: var(--accent);
+}
+
+.pill,
+.page,
+.themeToggle,
+.themeOption,
+.modalButtons button,
+#cancelTx {
+  background: var(--softButton);
+  border-color: var(--softBorder);
+  color: var(--muted);
+}
+
+.pill.active,
+.page.active,
+#saveTx {
+  background: linear-gradient(180deg, var(--accent), var(--accent));
+  color: white;
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.chartLock.active {
+  background: linear-gradient(180deg, var(--accent), var(--accent));
+  color: #ffffff;
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.chartLock.active svg {
+  stroke: white;
+  stroke-width: 2.5;
+}
+
+body[data-theme="red"] .chartLock.active {
+  color: var(--accent);
+}
+
+.themeOption.active {
+  background: var(--softButtonHover);
+  color: var(--text);
+}
+
+.panel,
+.modalCard input,
+.modalCard select,
+.searchBar {
+  border-color: var(--panelBorder);
+}
+
+td {
+  border-bottom-color: var(--tableBorder);
+  color: var(--text);
+}
+
+th {
+  border-bottom-color: var(--panelBorder);
+}
+
+.searchBar,
+.modalCard input,
+.modalCard select {
+  background: var(--inputBg);
+  color: var(--text);
+}
+
+.modalCard input:focus,
+.modalCard select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.flatpickr-calendar,
+.flatpickr-months .flatpickr-month,
+.flatpickr-weekdays {
+  background: var(--panel1) !important;
+  border-color: var(--panelBorder) !important;
+}
+
+.flatpickr-monthDropdown-months,
+.flatpickr-current-month .numInputWrapper {
+  background: var(--inputBg) !important;
+  color: var(--text) !important;
+  border-color: var(--softBorder) !important;
+}
+
+.flatpickr-current-month input.cur-year {
+  color: var(--text) !important;
+}
+
+.flatpickr-day:hover {
+  background: var(--softButtonHover) !important;
+}
+
+.flatpickr-day.selected {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: white !important;
+}
+
+body[data-theme="red"] .coinLogoImg {
+  filter:
+    grayscale(100%)
+    sepia(100%)
+    saturate(1400%)
+    hue-rotate(330deg)
+    brightness(0.78)
+    contrast(1.9);
+
+  opacity: 1;
+}
+
+body[data-theme="red"] .coinLogoFrame {
+  background: rgba(255, 64, 64, 0.08);
+  border-radius: 50%;
+}
+
+body[data-theme="red"] .searchBar {
+  color: #ff4d4d;
+}
+
+body[data-theme="red"] .searchBar::placeholder {
+  color: #ff4d4d;
+  opacity: 0.8;
+}
+
+#appPopupModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(5,8,15,0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 10090;;
+}
+
+#appPopupConfirm,
+#confirmExportBackup,
+#saveNotesEditor {
+  background: linear-gradient(180deg, var(--accent), var(--accent));
+  color: white;
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+#editDate,
+#editTime {
+  font-size: 18px;
+}
+
+#editAmount,
+#editPrice,
+#editNotes {
+  font-size: 18px;
+}
+
+#renamePortfolioModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(5,8,15,0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 10060;
+}
+
+#renamePortfolioInput,
+#backupNameInput {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+#savePortfolioRename {
+  background: linear-gradient(180deg, var(--accent), var(--accent));
+  color: white;
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.portfolioTitleButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 42px;
+  line-height: 1.05;
+  font-weight: 900;
+  letter-spacing: -1px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.portfolioArrow {
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  background: var(--softButton);
+  border: 1px solid var(--softBorder);
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0;
+  line-height: 1;
+  margin-left: 2px;
+}
+
+.portfolioArrow::before {
+  content: "⌄";
+  font-size: 24px;
+  line-height: 1;
+  transform: translateY(-5px);
+}
+
+.portfolioTitleWrap:hover .portfolioArrow {
+  background: var(--softButtonHover);
+  color: var(--text);
+}
+
+.portfolioTitleWrap {
+  position: relative;
+  display: inline-block;
+}
+
+#portfolioMenu {
+  display: none !important;
+}
+
+#portfolioPickerModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(5,8,15,0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 10055;
+}
+
+.portfolioPickerCard {
+  width: 560px;
+}
+
+.portfolioPickerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  border-radius: 16px;
+  background: var(--softButton);
+  border: 1px solid var(--softBorder);
+  cursor: pointer;
+}
+
+.portfolioPickerRow.active {
+  background: var(--softButtonHover);
+}
+
+.portfolioPickerName {
+  font-size: 22px;
+  font-weight: 850;
+}
+
+.portfolioPickerEdit {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid var(--softBorder);
+  background: var(--softButton);
+  color: var(--text);
+  font-size: 17px;
+  cursor: pointer;
+}
+
+.portfolioPickerEdit:hover {
+  background: var(--accent);
+  color: white;
+}
+
+.portfolioPickerCard {
+  width: 760px;
+
+  padding: 34px;
+
+  border-radius: 34px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(18,24,46,0.96),
+      rgba(10,14,28,0.98)
+    );
+
+  border: 1px solid rgba(255,255,255,0.06);
+
+  box-shadow:
+    0 30px 90px rgba(0,0,0,0.42),
+    inset 0 1px 0 rgba(255,255,255,0.03);
+}
+
+.portfolioPickerCard h2 {
+  font-size: 42px;
+  letter-spacing: -1.5px;
+  margin-bottom: 22px;
+
+  background: linear-gradient(
+    180deg,
+    #ffffff,
+    #d9deff
+  );
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.portfolioPickerRow {
+  min-height: 88px;
+
+  padding: 0 22px;
+
+  border-radius: 24px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.05),
+      rgba(255,255,255,0.025)
+    );
+
+  border: 1px solid rgba(255,255,255,0.06);
+
+  box-shadow: none;
+
+  transition: 0.16s ease;
+}
+
+.portfolioPickerRow:hover {
+  transform: translateY(-1px);
+
+  border-color: rgba(92,110,255,0.32);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(92,110,255,0.10),
+      rgba(92,110,255,0.04)
+    );
+}
+
+.portfolioPickerName {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+}
+
+.portfolioPickerEdit {
+  width: 54px;
+  height: 54px;
+
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.06),
+      rgba(255,255,255,0.03)
+    );
+
+  border: 1px solid rgba(255,255,255,0.06);
+
+  font-size: 20px;
+
+  box-shadow: none;
+
+  transition: 0.16s ease;
+}
+
+.portfolioPickerEdit:hover {
+  background:
+    linear-gradient(
+      180deg,
+      #5d6bff,
+      #4e5eff
+    );
+
+  border-color: rgba(255,255,255,0.10);
+
+  box-shadow:
+    0 0 18px rgba(92,110,255,0.22);
+}
+
+.portfolioCreateModalRow {
+  gap: 14px;
+}
+
+.portfolioCreateModalRow input {
+  height: 60px;
+
+  border-radius: 18px;
+
+  font-size: 19px;
+  font-weight: 700;
+
+  padding: 0 20px;
+
+  border: 1px solid rgba(92,110,255,0.18);
+
+  background: rgba(3,8,20,0.94);
+}
+
+.portfolioCreateModalRow button {
+  height: 60px;
+
+  padding: 0 24px;
+
+  border-radius: 18px;
+
+  font-size: 20px;
+  font-weight: 800;
+
+  background:
+    linear-gradient(
+      180deg,
+      #5b68ff,
+      #4b5bff
+    );
+
+  box-shadow:
+    0 0 18px rgba(92,110,255,0.20);
+}
+
+#closePortfolioPicker {
+  height: 64px;
+
+  margin-top: 22px;
+
+  border-radius: 20px;
+
+  font-size: 22px;
+  font-weight: 800;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.05),
+      rgba(255,255,255,0.02)
+    );
+
+  border: 1px solid rgba(255,255,255,0.06);
+
+  box-shadow: none;
+}
+
+.portfolioCreateModalRow {
+  display: flex;
+  gap: 10px;
+}
+
+.portfolioCreateModalRow input {
+  flex: 1;
+}
+
+.portfolioCreateModalRow button {
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--softBorder);
+  background: var(--softButton);
+  color: var(--text);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+#portfolioTitle {
+  font-size: 42px;
+  line-height: 1.05;
+  cursor: pointer;
+  user-select: none;
+}
+
+#portfolioTitle:hover {
+  opacity: 0.88;
+}
+
+.portfolioMenu {
+  position: absolute;
+  top: 58px;
+  left: 0;
+  width: 310px;
+  background: linear-gradient(180deg, var(--panel1), var(--panel2));
+  border: 1px solid var(--panelBorder);
+  border-radius: 18px;
+  box-shadow: 0 18px 55px var(--shadow);
+  padding: 14px;
+  z-index: 2000;
+  display: none;
+}
+
+.portfolioMenu.open {
+  display: block;
+}
+
+.portfolioMenuTitle {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.portfolioItem {
+  padding: 12px 14px;
+  border-radius: 12px;
+  color: var(--text);
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.portfolioName {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.editPortfolioBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: 1px solid var(--softBorder);
+  background: var(--softButton);
+  color: var(--text);
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.editPortfolioBtn:hover {
+  background: var(--accent);
+  color: white;
+}
+
+.portfolioItem:hover,
+.portfolioItem.active {
+  background: var(--softButtonHover);
+}
+
+.portfolioCreateRow {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.portfolioCreateRow input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--panelBorder);
+  background: var(--inputBg);
+  color: var(--text);
+  font-weight: 700;
+}
+
+.portfolioCreateRow button {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--softBorder);
+  background: var(--softButton);
+  color: var(--text);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.portfolioPickerCard h2,
+.portfolioPickerName,
+.portfolioCreateModalRow input,
+.portfolioCreateModalRow input::placeholder,
+.portfolioCreateModalRow button,
+#closePortfolioPicker,
+.portfolioPickerEdit {
+  color: var(--text) !important;
+  -webkit-text-fill-color: var(--text) !important;
+}
+
+.portfolioPickerCard {
+  background: linear-gradient(180deg, var(--panel1), var(--panel2)) !important;
+  border-color: var(--panelBorder) !important;
+}
+
+.portfolioPickerRow {
+  background: var(--softButton) !important;
+  border-color: var(--softBorder) !important;
+}
+
+.portfolioPickerRow.active {
+  background: var(--softButtonHover) !important;
+  border-color: var(--accent) !important;
+}
+
+.portfolioPickerEdit,
+.portfolioCreateModalRow button,
+#closePortfolioPicker {
+  background: var(--softButton) !important;
+  border-color: var(--softBorder) !important;
+  box-shadow: none !important;
+}
+
+.portfolioPickerEdit:hover,
+.portfolioCreateModalRow button:hover,
+#closePortfolioPicker:hover {
+  background: var(--accent) !important;
+  color: white !important;
+  -webkit-text-fill-color: white !important;
+}
+
+.portfolioCreateModalRow input {
+  background: var(--inputBg) !important;
+  border-color: var(--panelBorder) !important;
+  color: var(--text) !important;
+}
+
+body[data-theme="red"] .portfolioPickerCard h2,
+body[data-theme="red"] .portfolioPickerName,
+body[data-theme="red"] .portfolioCreateModalRow input,
+body[data-theme="red"] .portfolioCreateModalRow input::placeholder,
+body[data-theme="red"] #closePortfolioPicker {
+  color: #ff4040 !important;
+  -webkit-text-fill-color: #ff4040 !important;
+}
+
+body[data-theme="red"] .portfolioPickerRow.active,
+body[data-theme="red"] .portfolioCreateModalRow button,
+body[data-theme="red"] .portfolioPickerEdit:hover,
+body[data-theme="red"] #closePortfolioPicker:hover {
+  background: linear-gradient(
+    180deg,
+    #ff3c3c,
+    #d91d1d
+  ) !important;
+
+  color: white !important;
+  -webkit-text-fill-color: white !important;
+
+  border-color: rgba(255,80,80,0.35) !important;
+
+  box-shadow:
+    0 0 18px rgba(255,50,50,0.18);
+}
+
+body[data-theme="red"] .portfolioPickerCard label {
+  color: #ff4040 !important;
+  -webkit-text-fill-color: #ff4040 !important;
+  text-shadow: 0 0 10px rgba(255,60,60,0.22);
+}
+
+#deletePortfolioBtn {
+  background: linear-gradient(180deg, #ff4d63, #e63b53);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 8px 22px rgba(255,77,99,0.30);
+}
+
+#deletePortfolioBtn:hover {
+  background: linear-gradient(180deg, #ff5b70, #e63b53);
+  color: white;
+}
+
+#pickerNewPortfolioName::placeholder,
+#newPortfolioName::placeholder {
+  color: rgba(255,255,255,0.36) !important;
+  -webkit-text-fill-color: rgba(255,255,255,0.36) !important;
+  font-weight: 500 !important;
+}
+
+body[data-theme="light"] #pickerNewPortfolioName::placeholder,
+body[data-theme="light"] #newPortfolioName::placeholder {
+  color: rgba(18,21,32,0.38) !important;
+  -webkit-text-fill-color: rgba(18,21,32,0.38) !important;
+}
+
+body[data-theme="red"] #pickerNewPortfolioName::placeholder,
+body[data-theme="red"] #newPortfolioName::placeholder {
+  color: rgba(255,64,64,0.42) !important;
+  -webkit-text-fill-color: rgba(255,64,64,0.42) !important;
+}
+
+#addCoinModal input::placeholder {
+  color: rgba(255,255,255,0.29) !important;
+  -webkit-text-fill-color: rgba(255,255,255,0.29) !important;
+  font-weight: 500 !important;
+}
+
+body[data-theme="light"] #addCoinModal input::placeholder {
+  color: rgba(18,21,32,0.30) !important;
+  -webkit-text-fill-color: rgba(18,21,32,0.30) !important;
+}
+
+body[data-theme="red"] #addCoinModal input::placeholder {
+  color: rgba(255,64,64,0.34) !important;
+  -webkit-text-fill-color: rgba(255,64,64,0.34) !important;
+}
+
+#editCoinsList {
+  max-height: min(740px, 70vh);
+  overflow-y: auto;
+  padding-right: 6px;
+  margin-right: -6px;
+}
+
+#editCoinsList::-webkit-scrollbar {
+  width: 8px;
+}
+
+#editCoinsList::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#editCoinsList::-webkit-scrollbar-thumb {
+  background: var(--softButtonHover);
+  border-radius: 999px;
+}
+
+#editCoinsList::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+#notesEditorModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(5,8,15,0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 10100;
+}
+
+#notesEditorTextarea {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 260px;
+  max-height: 52vh;
+  resize: vertical;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid var(--panelBorder);
+  background: var(--inputBg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.35;
+  outline: none;
+}
+
+#notesEditorTextarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+
+  </style>
+</head>
+
+<body>
+<div class="app">
+
+  <div class="top">
+    <div>
+      <div class="portfolioTitleWrap">
+  <div id="portfolioTitle" class="portfolioTitleButton">
+  <span id="portfolioTitleText">My Portfolio</span>
+  <span class="portfolioArrow">⌄</span>
+</div>
+
+  <div id="portfolioMenu" class="portfolioMenu">
+    <div class="portfolioMenuTitle">Portfolios</div>
+    <div id="portfolioList"></div>
+
+    <div class="portfolioCreateRow">
+  <input id="newPortfolioName" type="text" placeholder="Enter Portfolio Name">
+  <button id="createPortfolioBtn">Create</button>
+</div>
+  </div>
+</div>
+    </div>
+
+   <div class="priceBox">
+  <div class="themeMenuWrap">
+   <div class="themeToggle" id="themeToggle">☾</div>
+
+<div class="themeDropdown" id="themeDropdown">
+ <div class="themeOption active" data-theme-label="☾ Dark"><span class="themeIcon">☾</span><span>Dark</span></div>
+<div class="themeOption" data-theme-label="☀ Light"><span class="themeIcon sunIcon">☀</span><span>Light</span></div>
+<div class="themeOption" data-theme-label="◉ Red"><span class="themeIcon">◉</span><span>Red</span></div>
+</div>
+  </div>
+
+  <div id="apiStatusBox" class="apiStatusBox">
+    <strong>API:</strong> <span id="apiStatusOverall" class="apiStatusWarn">Starting...</span><br>
+    <span id="apiStatusLive">Live: waiting</span><br>
+    <span id="apiStatusChart">Chart: waiting</span><br>
+    <span id="apiStatusLocal">Local: checking</span>
+    <div id="apiStatusLog" class="apiStatusLog"></div>
+  </div>
+</div>
+  </div>
+
+ <div class="tabs">
+  <div class="tab active" data-view="overview">Overview</div>
+  <div class="tab" data-view="holdings">Holdings</div>
+  <div class="tab" data-view="settings">Settings</div>
+</div>
+
+<div id="overviewView">
+
+  <div class="mainBalance">
+  <div class="bigUsd" id="portfolioValue">$0</div>
+  <div class="dayChange green" id="dayChange">24h: + $0</div>
+</div>
+
+  <div class="panel">
+    <div class="panelHead">
+      <h2>Portfolio Performance</h2>
+<div class="pillRow">
+
+<div class="pill chartLock" id="chartLock" title="Freeze Chart">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <rect x="6" y="11" width="12" height="9" rx="2"></rect>
+    <path d="M8 11V8a4 4 0 0 1 8 0v3"></path>
+  </svg>
+</div>
+
+<div class="pill chartMode" data-mode="24h">24h</div>
+  <div class="pill chartMode" data-mode="7d">7d</div>
+  <div class="pill chartMode" data-mode="30d">30d</div>
+  <div class="pill chartMode" data-mode="90d">90d</div>
+  <div class="pill chartMode" data-mode="1y">1y</div>
+  <div class="pill chartMode active" data-mode="all">All</div>
+</div>
+    </div>
+    <canvas id="valueChart"></canvas>
+
+<div class="chartDateRow">
+  <span id="chartStartLabel">May 2022</span>
+  <span id="chartEndLabel">May 2026</span>
+</div>
+  </div>
+
+  <div class="panelHead">
+  <h2>All Transactions</h2>
+
+  <div class="pillRow">
+    <div class="pill txTypeFilter active" data-type="all">All Types</div>
+<div class="pill txTypeFilter" data-type="buy">Buys</div>
+<div class="pill txTypeFilter" data-type="sell">Sells</div>
+<div class="pill" id="addTx">Add Transaction</div>
+  </div>
+</div>
+
+<input class="searchBar" placeholder="Search transactions..." />
+
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Amount</th>
+          <th>Price</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody id="allRows"></tbody>
+    </table>
+
+        <div class="footerPages" id="pagination"></div>
+  </div>
+
+<div id="holdingsView" style="display:none;">
+  <div class="panel">
+    <div class="panelHead">
+      <h2>Holdings</h2>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Coin</th>
+          <th>Holdings</th>
+          <th>Current Value</th>
+          <th>Cost Basis</th>
+          <th>Avg Cost</th>
+          <th>P/L</th>
+          <th>Allocation</th>
+        </tr>
+      </thead>
+      <tbody id="holdingsRows"></tbody>
+    </table>
+  </div>
+</div>
+
+
+<div id="settingsView" style="display:none;">
+
+  <div class="panel">
+    <div class="panelHead">
+      <h2>Settings</h2>
+    </div>
+
+    <div class="settingsSection">
+      <h3>API Controls</h3>
+
+      <div class="settingsMiniInfo">
+        <div>
+          <span>Source</span>
+          <strong id="settingsPriceSource">CoinGecko</strong>
+        </div>
+
+        <div>
+          <span>Last Updated</span>
+          <strong id="settingsLastUpdated">--</strong>
+        </div>
+
+        <div>
+          <span>Refresh</span>
+          <strong id="settingsRefreshInterval">60s</strong>
+        </div>
+
+        <div>
+          <span>Cache</span>
+          <strong id="settingsApiCache">Memory</strong>
+        </div>
+      </div>
+
+      <div class="pillRow settingsActions">
+        <div class="pill" id="manualRefreshApi">Refresh APIs</div>
+        <div class="pill refreshIntervalBtn" data-interval="manual">Manual</div>
+        <div class="pill refreshIntervalBtn" data-interval="30000">30s</div>
+        <div class="pill refreshIntervalBtn active" data-interval="60000">60s</div>
+        <div class="pill refreshIntervalBtn" data-interval="300000">5m</div>
+        <div class="pill" id="clearApiCache">Clear API Cache</div>
+      </div>
+    </div>
+
+    <div class="settingsSection">
+      <h3>Portfolio</h3>
+
+      <div class="settingsMiniInfo">
+        <div>
+          <span>Transactions</span>
+          <strong id="settingsTxCount">0</strong>
+        </div>
+
+        <div>
+          <span>Coins</span>
+          <strong>Multi-coin Enabled</strong>
+        </div>
+
+        <div>
+          <span>Currency</span>
+          <strong>USD</strong>
+        </div>
+
+        <div>
+          <span>Timezone</span>
+          <strong>Local</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="settingsSection">
+      <h3>Data Tools</h3>
+
+  <div class="pillRow settingsActions">
+  <div class="pill" id="addCoinBtn">Add Coin</div>
+  <div class="pill" id="editCoinsBtn">Edit Coins</div>
+  <div class="pill" id="exportBackup">Export Backup</div>
+  <div class="pill" id="importBackup">Import Backup</div>
+  <div class="pill" id="importCsvTx">Import CSV</div>
+  <div class="pill" id="wipeTxs">WIPE TXS</div>
+
+  <input id="backupFileInput" type="file" accept=".json,application/json" style="display:none;">
+  <input id="csvFileInput" type="file" accept=".csv,text/csv" style="display:none;">
+</div>
+    </div>
+
+  </div>
+</div>
+
+<div id="editModal" style="display:none;">
+  <div class="modalCard">
+   <h2 id="txModalTitle">Edit Transaction</h2>
+
+    <label>Date</label>
+    <input id="editDate" type="text">
+
+    <label>Time</label>
+    <input id="editTime" type="time" step="60">
+
+   <label>Type</label>
+
+<div class="pillRow" id="editTypeRow">
+  <div class="pill editTypeBtn active" id="editBuy" data-type="Buy">Buy</div>
+  <div class="pill editTypeBtn" id="editSell" data-type="Sell">Sell</div>
+  <div class="pill editTypeBtn" id="editTransferIn" data-type="Transfer In">Transfer In</div>
+  <div class="pill editTypeBtn" id="editTransferOut" data-type="Transfer Out">Transfer Out</div>
+</div>
+
+<input id="editType" type="hidden" value="Buy">
+
+<label>Coin</label>
+<select id="editCoin"></select>
+
+<label>Amount</label>
+<input id="editAmount" type="number">
+
+   <label>Price</label>
+<input id="editPrice" type="number" step="0.000001">
+
+<label>Notes</label>
+<input id="editNotes" type="text">
+    <div class="modalButtons">
+  <button id="saveTx">Save</button>
+  <button id="deleteTx">Delete</button>
+  <button id="cancelTx">Cancel</button>
+</div>
+  </div>
+</div>
+
+<div id="deleteConfirmModal" style="display:none;">
+  <div class="modalCard">
+    <h2>Delete Transaction?</h2>
+    <div class="sub" style="margin-bottom:22px;">
+      This can’t be undone.
+    </div>
+
+    <div class="modalButtons">
+      <button id="confirmDeleteTx">Delete</button>
+      <button id="cancelDeleteTx">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="typeChangeConfirmModal" style="display:none;">
+  <div class="modalCard">
+    <h2>Change Type?</h2>
+    <div class="sub" id="typeChangeText" style="margin-bottom:22px;">
+      Confirm transaction type change.
+    </div>
+
+    <div class="modalButtons">
+      <button id="confirmTypeChange">Change</button>
+      <button id="cancelTypeChange">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="appPopupModal" style="display:none;">
+  <div class="modalCard">
+    <h2 id="appPopupTitle">Notice</h2>
+    <div class="sub" id="appPopupMessage" style="margin-bottom:22px;"></div>
+
+    <div class="modalButtons">
+      <button id="appPopupConfirm">OK</button>
+      <button id="appPopupCancel" style="display:none;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+
+
+<div id="notesEditorModal" style="display:none;">
+  <div class="modalCard">
+    <h2>Transaction Notes</h2>
+
+    <label>Notes</label>
+    <textarea id="notesEditorTextarea" placeholder="Add notes..."></textarea>
+
+    <div class="modalButtons">
+      <button id="saveNotesEditor">Done</button>
+      <button id="cancelNotesEditor">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="backupNameModal" style="display:none; position:fixed; inset:0; background:rgba(5,8,15,0.72); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); justify-content:center; align-items:center; z-index:10095;">
+  <div class="modalCard">
+    <h2>Name Backup</h2>
+
+    <label>Backup Name</label>
+    <input id="backupNameInput" type="text" placeholder="Example: May Portfolio Backup">
+
+    <div class="modalButtons">
+      <button id="confirmExportBackup">Export</button>
+      <button id="cancelExportBackup">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="renamePortfolioModal" style="display:none;">
+  <div class="modalCard">
+    <h2>Rename Portfolio</h2>
+
+    <label>Portfolio Name</label>
+    <input id="renamePortfolioInput" type="text">
+
+    <div class="modalButtons">
+  <button id="savePortfolioRename">Save</button>
+  <button id="deletePortfolioBtn">Delete</button>
+  <button id="cancelPortfolioRename">Cancel</button>
+</div>
+  </div>
+</div>
+
+<div id="portfolioPickerModal" style="display:none;">
+  <div class="modalCard portfolioPickerCard">
+    <h2>Portfolios</h2>
+
+    <div id="portfolioPickerList"></div>
+
+    <label style="margin-top:22px;">Create Portfolio</label>
+    <div class="portfolioCreateModalRow">
+     <input id="pickerNewPortfolioName" type="text" placeholder="Enter Portfolio Name">
+      <button id="pickerCreatePortfolioBtn">Create</button>
+    </div>
+
+    <div class="modalButtons">
+      <button id="closePortfolioPicker">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="addCoinModal" style="display:none;">
+  <div class="modalCard">
+    <h2>Add Coin</h2>
+
+    <label>Symbol</label>
+    <input id="addCoinSymbol" type="text" placeholder="Example: ETH">
+
+    <label>Name</label>
+    <input id="addCoinName" type="text" placeholder="Example: Ethereum">
+
+    <label>CoinGecko ID</label>
+    <input id="addCoinGeckoId" type="text" placeholder="Example: ethereum">
+
+    <label>CoinPaprika ID</label>
+    <input id="addCoinPaprikaId" type="text" placeholder="Optional">
+
+    <label>Logo Image</label>
+<input id="addCoinLogoInput" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml">
+
+<label>Logo Scale</label>
+<input id="addCoinLogoScale" type="number" step="0.01" min="0.2" max="3" value="1">
+
+<label>Historical CSV</label>
+    <input id="addCoinCsvInput" type="file" accept=".csv,text/csv">
+
+    <div class="sub" id="addCoinStatus" style="font-size:14px; margin-top:14px;"></div>
+
+    <div class="modalButtons">
+      <button id="saveAddCoin">Save Coin</button>
+      <button id="cancelAddCoin">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="editCoinsModal" style="display:none;">
+  <div class="modalCard">
+    <h2>Edit Coins</h2>
+
+    <div id="editCoinsList"></div>
+
+    <div class="modalButtons">
+      <button id="closeEditCoins">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+const CUSTOM_COINS_KEY = "lctCustomCoinsV1";
+const CUSTOM_HISTORICAL_PRICES_KEY = "lctCustomHistoricalPricesV1";
+
+const DEFAULT_COINS = {
+  BTC: {
+    name: "Bitcoin",
+    coinGeckoId: "bitcoin",
+    coinPaprikaId: "btc-bitcoin",
+    logo: "assets/btc-logo.png",
+    logoScale: 0.82
+  },
+
+  ETH: {
+    name: "Ethereum",
+    coinGeckoId: "ethereum",
+    coinPaprikaId: "eth-ethereum",
+    logo: "assets/eth-logo.png",
+    logoScale: 1
+  },
+
+  SOL: {
+    name: "Solana",
+    coinGeckoId: "solana",
+    coinPaprikaId: "sol-solana",
+    logo: "assets/sol-logo.png",
+    logoScale: 1
+  },
+
+  XMR: {
+    name: "Monero",
+    coinGeckoId: "monero",
+    coinPaprikaId: "xmr-monero",
+    logo: "assets/xmr-logo.png",
+    logoScale: 1
+  },
+
+  LTC: {
+    name: "Litecoin",
+    coinGeckoId: "litecoin",
+    coinPaprikaId: "ltc-litecoin",
+    logo: "assets/ltc-logo.png",
+    logoScale: 1
+  },
+
+  ZEC: {
+    name: "Zcash",
+    coinGeckoId: "zcash",
+    coinPaprikaId: "zec-zcash",
+    logo: "assets/zec-logo.png",
+    logoScale: 1
+  },
+
+  BCH: {
+    name: "Bitcoin Cash",
+    coinGeckoId: "bitcoin-cash",
+    coinPaprikaId: "bch-bitcoin-cash",
+    logo: "assets/bch-logo.png",
+    logoScale: 1
+  },
+
+  BSV: {
+    name: "Bitcoin SV",
+    coinGeckoId: "bitcoin-cash-sv",
+    coinPaprikaId: "bsv-bitcoin-sv",
+    logo: "assets/bsv-logo.png",
+    logoScale: 1
+  },
+
+  KAS: {
+    name: "Kaspa",
+    coinGeckoId: "kaspa",
+    coinPaprikaId: "kas-kaspa",
+    logo: "assets/kas-logo.png",
+    logoScale: 1.18
+  }
+};
+
+let customCoins = loadCustomCoins();
+let customHistoricalPrices = loadCustomHistoricalPrices();
+
+let COINS = {
+  ...DEFAULT_COINS,
+  ...customCoins
+};
+
+function loadCustomCoins() {
+  try {
+    const saved = localStorage.getItem(CUSTOM_COINS_KEY);
+    const parsed = saved ? JSON.parse(saved) : {};
+
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return {};
+    }
+
+    return parsed;
+  } catch (e) {
+    return {};
+  }
+}
+
+function saveCustomCoins() {
+  localStorage.setItem(CUSTOM_COINS_KEY, JSON.stringify(customCoins));
+}
+
+function loadCustomHistoricalPrices() {
+  try {
+    const saved = localStorage.getItem(CUSTOM_HISTORICAL_PRICES_KEY);
+    const parsed = saved ? JSON.parse(saved) : {};
+
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return {};
+    }
+
+    return parsed;
+  } catch (e) {
+    return {};
+  }
+}
+
+function saveCustomHistoricalPrices() {
+  localStorage.setItem(
+    CUSTOM_HISTORICAL_PRICES_KEY,
+    JSON.stringify(customHistoricalPrices)
+  );
+}
+
+function rebuildCoins() {
+  COINS = {
+    ...DEFAULT_COINS,
+    ...customCoins
+  };
+}
+
+function normalizeCoinSymbol(symbol) {
+  return String(symbol || "")
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "");
+}
+
+function assetLogoPathForSymbol(symbol) {
+  const cleanSymbol = normalizeCoinSymbol(symbol);
+
+  if (!cleanSymbol) {
+    return "";
+  }
+
+  return "assets/" + cleanSymbol.toLowerCase() + "-logo.png";
+}
+
+function imagePathExists(path) {
+  return new Promise(resolve => {
+    if (!path) {
+      resolve(false);
+      return;
+    }
+
+    const img = new Image();
+
+    img.onload = function() {
+      resolve(true);
+    };
+
+    img.onerror = function() {
+      resolve(false);
+    };
+
+    img.src = path;
+  });
+}
+
+async function findAssetLogoForSymbol(symbol) {
+  const path = assetLogoPathForSymbol(symbol);
+
+  if (await imagePathExists(path)) {
+    return path;
+  }
+
+  return "";
+}
+
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
+    if (!file) {
+      resolve("");
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+      resolve(e.target.result || "");
+    };
+
+    reader.onerror = function() {
+      reject(new Error("Could not read file."));
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
+function normalizeCsvHeader(header) {
+  return String(header || "")
+    .trim()
+    .toLowerCase()
+    .replace(/^\uFEFF/, "")
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function detectCsvDelimiter(line) {
+  const candidates = [",", ";", "\t", "|"];
+  let bestDelimiter = ",";
+  let bestCount = 0;
+
+  candidates.forEach(delimiter => {
+    let count = 0;
+    let inQuotes = false;
+
+    for (let i = 0; i < String(line || "").length; i++) {
+      const char = line[i];
+
+      if (char === '"' && line[i + 1] === '"') {
+        i++;
+      } else if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === delimiter && !inQuotes) {
+        count++;
+      }
+    }
+
+    if (count > bestCount) {
+      bestCount = count;
+      bestDelimiter = delimiter;
+    }
+  });
+
+  return bestDelimiter;
+}
+
+function findHistoricalColumn(headers, preferredNames, fallbackCheck) {
+  for (const name of preferredNames) {
+    const normalizedName = normalizeCsvHeader(name);
+    const index = headers.findIndex(h => h.normalized === normalizedName);
+    if (index >= 0) return index;
+  }
+
+  if (typeof fallbackCheck === "function") {
+    const index = headers.findIndex(h => fallbackCheck(h.normalized, h.raw));
+    if (index >= 0) return index;
+  }
+
+  return -1;
+}
+
+function parseHistoricalCsvDate(rawDate) {
+  const value = String(rawDate || "").trim();
+  if (!value) return null;
+
+  const isoMatch = value.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (isoMatch) {
+    const year = Number(isoMatch[1]);
+    const month = Number(isoMatch[2]);
+    const day = Number(isoMatch[3]);
+    return new Date(year, month - 1, day);
+  }
+
+  const slashMatch = value.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+  if (slashMatch) {
+    let year = Number(slashMatch[3]);
+    if (year < 100) year += 2000;
+
+    const first = Number(slashMatch[1]);
+    const second = Number(slashMatch[2]);
+
+    return new Date(year, first - 1, second);
+  }
+
+  const parsed = new Date(value);
+  if (!isNaN(parsed.getTime())) {
+    return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+  }
+
+  return null;
+}
+
+function parseHistoricalCsvPrice(rawPrice) {
+  let value = String(rawPrice || "")
+    .replaceAll("$", "")
+    .replaceAll("€", "")
+    .replaceAll("£", "")
+    .replaceAll(" ", "")
+    .trim();
+
+  if (!value) return NaN;
+
+  value = value.replace(/^\((.*)\)$/, "-$1");
+
+  const commaCount = (value.match(/,/g) || []).length;
+  const dotCount = (value.match(/\./g) || []).length;
+
+  if (commaCount && dotCount) {
+    value = value.replaceAll(",", "");
+  } else if (commaCount === 1 && dotCount === 0) {
+    value = value.replace(",", ".");
+  } else {
+    value = value.replaceAll(",", "");
+  }
+
+  return Number(value);
+}
+
+function parseHistoricalCsvText(csvText) {
+  const lines = String(csvText || "")
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(Boolean);
+
+  if (lines.length < 2) {
+    return {
+      prices: {},
+      count: 0,
+      error: "CSV is empty or missing rows."
+    };
+  }
+
+  const delimiter = detectCsvDelimiter(lines[0]);
+  const headerRow = parseCsvLine(lines[0], delimiter);
+
+  const headers = headerRow.map(h => ({
+    raw: String(h || "").trim(),
+    normalized: normalizeCsvHeader(h)
+  }));
+
+  const dateIndex = findHistoricalColumn(
+    headers,
+    [
+      "timestamp",
+      "timeClose",
+      "timeOpen",
+      "timeHigh",
+      "timeLow",
+      "snapped_at",
+      "date",
+      "Date"
+    ],
+    normalized => normalized.includes("date") || normalized.includes("time")
+  );
+
+  const priceIndex = findHistoricalColumn(
+    headers,
+    [
+      "close",
+      "Close",
+      "price",
+      "Price",
+      "Price (USD)",
+      "closePrice",
+      "Close Price"
+    ],
+    normalized =>
+      normalized === "close" ||
+      normalized === "price" ||
+      normalized.includes("closeprice") ||
+      normalized.includes("priceusd")
+  );
+
+  if (dateIndex < 0 || priceIndex < 0) {
+    return {
+      prices: {},
+      count: 0,
+      error: "Expected a Date/timestamp column and a Close/Price column."
+    };
+  }
+
+  const prices = {};
+  let count = 0;
+
+  for (let i = 1; i < lines.length; i++) {
+    const row = parseCsvLine(lines[i], delimiter);
+
+    const rawDate = row[dateIndex];
+    const parsedPrice = parseHistoricalCsvPrice(row[priceIndex]);
+
+    if (!rawDate || !parsedPrice || parsedPrice <= 0) continue;
+
+    const parsedDate = parseHistoricalCsvDate(rawDate);
+
+    if (!parsedDate || isNaN(parsedDate.getTime())) continue;
+
+    const key = dateKeyFromDate(parsedDate);
+    prices[key] = parsedPrice;
+    count++;
+  }
+
+  if (count === 0) {
+    return {
+      prices: {},
+      count: 0,
+      error: "No usable historical prices found."
+    };
+  }
+
+  return {
+    prices,
+    count,
+    error: ""
+  };
+}
+
+function resetAddCoinModal() {
+  document.getElementById("addCoinSymbol").value = "";
+  document.getElementById("addCoinName").value = "";
+  document.getElementById("addCoinGeckoId").value = "";
+  document.getElementById("addCoinPaprikaId").value = "";
+  document.getElementById("addCoinLogoInput").value = "";
+  document.getElementById("addCoinCsvInput").value = "";
+  document.getElementById("addCoinStatus").textContent = "";
+
+  const scaleInput = document.getElementById("addCoinLogoScale");
+  if (scaleInput) scaleInput.value = "1";
+
+  pendingAddCoinLogoData = "";
+  pendingAddCoinCsvData = null;
+  editingCoinSymbol = null;
+  editingCoinOriginalLogo = "";
+}
+
+function renderEditCoinsList() {
+  const list = document.getElementById("editCoinsList");
+  if (!list) return;
+
+  list.innerHTML = getSupportedCoins().map(symbol => {
+    const coin = getCoinInfo(symbol);
+    const canDelete = !!customCoins[symbol] && !DEFAULT_COINS[symbol];
+
+    return `
+      <div class="coinEditRow">
+        <div class="coinEditInfo">
+          ${coinLogoHtml(symbol)}
+          <div class="coinEditText">
+            <div class="coinEditSymbol">${symbol}</div>
+            <div class="coinEditName">${coin.name || symbol}</div>
+          </div>
+        </div>
+
+        <div class="coinEditActions">
+          <button class="coinEditButton" data-symbol="${symbol}">Edit</button>
+          ${canDelete ? `<button class="coinDeleteButton" data-symbol="${symbol}">Delete</button>` : ""}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function openEditCoinsModal() {
+  renderEditCoinsList();
+  document.getElementById("editCoinsModal").style.display = "flex";
+}
+
+function deleteCustomCoin(symbol) {
+  const cleanSymbol = normalizeCoinSymbol(symbol);
+  if (!cleanSymbol) return;
+
+  if (DEFAULT_COINS[cleanSymbol]) {
+    showAppAlert("Can’t Delete", "Built-in coins can’t be deleted yet.");
+    return;
+  }
+
+  if (!customCoins[cleanSymbol]) {
+    showAppAlert("Coin Not Found", cleanSymbol + " is not a custom coin.");
+    return;
+  }
+
+  showAppConfirm(
+    "Delete Coin?",
+    "This removes " + cleanSymbol + " from your custom coin list and future transaction dropdowns. Existing transactions will stay and use a default logo.",
+    function() {
+      delete customCoins[cleanSymbol];
+      saveCustomCoins();
+      rebuildCoins();
+
+      populateCoinDropdown("KAS");
+      recalculatePortfolioState();
+      updatePortfolioHeader();
+      renderHoldings();
+      renderTransactionTables();
+      updateSettingsPanel();
+      renderEditCoinsList();
+
+      const activeMode = document.querySelector(".chartMode.active")?.dataset.mode || "all";
+      requestChartRender(activeMode);
+
+      showAppAlert("Coin Deleted", cleanSymbol + " was removed from the custom coin list. Existing transactions were not changed.");
+    }
+  );
+}
+
+function openEditCoinModal(symbol) {
+  const cleanSymbol = normalizeCoinSymbol(symbol);
+  const coin = getCoinInfo(cleanSymbol);
+  if (!coin) return;
+document.getElementById("editCoinsModal").style.display = "none";
+
+  resetAddCoinModal();
+
+  editingCoinSymbol = cleanSymbol;
+  editingCoinOriginalLogo = coin.logo || "";
+
+  document.querySelector("#addCoinModal h2").textContent = "Edit Coin";
+  document.getElementById("saveAddCoin").textContent = "Save Coin";
+
+  document.getElementById("addCoinSymbol").value = cleanSymbol;
+  document.getElementById("addCoinName").value = coin.name || "";
+  document.getElementById("addCoinGeckoId").value = coin.coinGeckoId || "";
+  document.getElementById("addCoinPaprikaId").value = coin.coinPaprikaId || "";
+
+  const scaleInput = document.getElementById("addCoinLogoScale");
+  if (scaleInput) scaleInput.value = Number(coin.logoScale || 1);
+
+  document.getElementById("addCoinStatus").textContent =
+    DEFAULT_COINS[cleanSymbol]
+      ? "Editing built-in coin. Symbol cannot be changed."
+      : "Editing custom coin.";
+
+  document.getElementById("addCoinModal").style.display = "flex";
+
+  setTimeout(() => {
+    document.getElementById("addCoinName").focus();
+  }, 50);
+}
+
+function refreshAfterCoinEdit(selectedSymbol = "KAS") {
+  rebuildCoins();
+  loadHistoricalPrices();
+
+  populateCoinDropdown(selectedSymbol);
+
+  recalculatePortfolioState();
+  updatePortfolioHeader();
+  renderHoldings();
+  renderTransactionTables();
+  updateSettingsPanel();
+  renderEditCoinsList();
+
+  const activeMode = document.querySelector(".chartMode.active")?.dataset.mode || "all";
+  requestChartRender(activeMode);
+}
+
+function getSupportedCoins() {
+  return Object.keys(COINS).sort();
+}
+
+async function ensureCoinExistsForImport(symbol) {
+  const cleanSymbol = normalizeCoinSymbol(symbol);
+  if (!cleanSymbol) return false;
+
+  if (COINS[cleanSymbol]) {
+    return true;
+  }
+
+  const assetLogo = await findAssetLogoForSymbol(cleanSymbol);
+
+  customCoins[cleanSymbol] = {
+    name: cleanSymbol,
+    coinGeckoId: "",
+    coinPaprikaId: "",
+    logo: assetLogo || makeFallbackCoinLogo(cleanSymbol),
+    logoScale: 1
+  };
+
+  saveCustomCoins();
+  rebuildCoins();
+
+  return true;
+}
+
+function populateCoinDropdown(selectedCoin = "KAS") {
+  const coinSelect = document.getElementById("editCoin");
+  if (!coinSelect) return;
+
+  const selected = String(selectedCoin || "KAS").toUpperCase();
+
+  coinSelect.innerHTML = getSupportedCoins()
+    .map(symbol => {
+      const coin = COINS[symbol];
+      const label = coin && coin.name ? `${symbol} · ${coin.name}` : symbol;
+      return `<option value="${symbol}">${label}</option>`;
+    })
+    .join("");
+
+  coinSelect.value = getSupportedCoins().includes(selected) ? selected : "KAS";
+}
+
+const LAST_GOOD_LIVE_PRICES_KEY = "lctLastGoodLivePricesV1";
+
+let livePrices = {};
+let historicalPrices = {};
+
+const apiStatusState = {
+  overall: "Starting...",
+  overallClass: "apiStatusWarn",
+  live: "Live: waiting",
+  chart: "Chart: waiting",
+  local: "Local: checking",
+  log: [],
+  lastUpdated: null
+};
+
+function setApiStatus(part, message, statusClass = "apiStatusWarn") {
+  if (!part || !message) return;
+
+  const cleanMessage = String(message);
+
+  if (part === "overall") {
+    apiStatusState.overall = cleanMessage;
+    apiStatusState.overallClass = statusClass;
+  } else if (part === "live") {
+    apiStatusState.live = cleanMessage;
+  } else if (part === "chart") {
+    apiStatusState.chart = cleanMessage;
+  } else if (part === "local") {
+    apiStatusState.local = cleanMessage;
+  }
+
+  apiStatusState.lastUpdated = Date.now();
+  apiStatusLog(part, cleanMessage);
+  updateApiStatusUI();
+}
+
+function apiStatusLog(part, message) {
+  const stamp = new Date().toLocaleTimeString([], {
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit"
+  });
+
+  apiStatusState.log.unshift(stamp + " " + String(part || "api").toUpperCase() + ": " + String(message || ""));
+  apiStatusState.log = apiStatusState.log.slice(0, 7);
+}
+
+function updateApiStatusUI() {
+  const overall = document.getElementById("apiStatusOverall");
+  const live = document.getElementById("apiStatusLive");
+  const chart = document.getElementById("apiStatusChart");
+  const local = document.getElementById("apiStatusLocal");
+  const log = document.getElementById("apiStatusLog");
+
+  if (overall) {
+    overall.textContent = apiStatusState.overall;
+    overall.className = apiStatusState.overallClass || "apiStatusWarn";
+  }
+
+  if (live) live.textContent = apiStatusState.live;
+  if (chart) chart.textContent = apiStatusState.chart;
+  if (local) local.textContent = apiStatusState.local;
+  if (log) log.innerHTML = apiStatusState.log.map(line => `<div>${line}</div>`).join("");
+}
+
+function summarizeLocalHistoricalStatus() {
+  const symbols = Object.keys(historicalPrices || {});
+  const activeSymbols = getCoinSymbolsForPriceEngine();
+  const relevant = activeSymbols.length ? activeSymbols : symbols;
+
+  const parts = relevant.map(symbol => {
+    const cleanSymbol = normalizeCoinSymbol(symbol);
+    const keys = Object.keys(historicalPrices[cleanSymbol] || {}).sort();
+    if (!keys.length) return cleanSymbol + ": no local";
+    return cleanSymbol + ": through " + keys[keys.length - 1];
+  });
+
+  return parts.length ? "Local: " + parts.join(" · ") : "Local: no files loaded";
+}
+
+let pendingAddCoinLogoData = "";
+let pendingAddCoinCsvData = null;
+let editingCoinSymbol = null;
+let editingCoinOriginalLogo = "";
+
+let pendingRenamePortfolioId = null;
+
+function openRenamePortfolioModal(id) {
+  const portfolio = portfolios.find(p => p.id === id);
+  if (!portfolio) return;
+
+  pendingRenamePortfolioId = id;
+
+  const input = document.getElementById("renamePortfolioInput");
+  input.value = portfolio.name;
+
+  document.getElementById("renamePortfolioModal").style.display = "flex";
+
+  setTimeout(() => {
+    input.focus();
+    input.select();
+  }, 50);
+}
+
+document.getElementById("savePortfolioRename").addEventListener("click", function() {
+  const input = document.getElementById("renamePortfolioInput");
+  const newName = input.value.trim();
+
+  if (!pendingRenamePortfolioId || !newName) return;
+
+  const portfolio = portfolios.find(p => p.id === pendingRenamePortfolioId);
+  if (!portfolio) return;
+
+  portfolio.name = newName;
+
+  localStorage.setItem(PORTFOLIOS_KEY, JSON.stringify(portfolios));
+
+  pendingRenamePortfolioId = null;
+
+  document.getElementById("renamePortfolioModal").style.display = "none";
+
+  renderPortfolioMenu();
+renderPortfolioPicker();
+
+if (portfolio.id === activePortfolioId) {
+  document.getElementById("portfolioTitleText").textContent = portfolio.name;
+}
+});
+
+document.getElementById("addCoinBtn").addEventListener("click", function() {
+  resetAddCoinModal();
+
+  document.querySelector("#addCoinModal h2").textContent = "Add Coin";
+  document.getElementById("saveAddCoin").textContent = "Save Coin";
+
+  document.getElementById("addCoinModal").style.display = "flex";
+
+  setTimeout(() => {
+    document.getElementById("addCoinSymbol").focus();
+  }, 50);
+});
+
+document.getElementById("cancelAddCoin").addEventListener("click", function() {
+  resetAddCoinModal();
+  document.getElementById("addCoinModal").style.display = "none";
+});
+
+const editCoinsBtn = document.getElementById("editCoinsBtn");
+if (editCoinsBtn) {
+  editCoinsBtn.addEventListener("click", function() {
+    openEditCoinsModal();
+  });
+}
+
+const closeEditCoins = document.getElementById("closeEditCoins");
+if (closeEditCoins) {
+  closeEditCoins.addEventListener("click", function() {
+    document.getElementById("editCoinsModal").style.display = "none";
+  });
+}
+
+const editCoinsList = document.getElementById("editCoinsList");
+if (editCoinsList) {
+  editCoinsList.addEventListener("click", function(e) {
+    const deleteBtn = e.target.closest(".coinDeleteButton");
+    if (deleteBtn) {
+      deleteCustomCoin(deleteBtn.dataset.symbol);
+      return;
+    }
+
+    const btn = e.target.closest(".coinEditButton");
+    if (!btn) return;
+
+    openEditCoinModal(btn.dataset.symbol);
+  });
+}
+
+document.getElementById("cancelPortfolioRename").addEventListener("click", function() {
+  pendingRenamePortfolioId = null;
+
+  document.getElementById("renamePortfolioModal").style.display = "none";
+});
+
+document.getElementById("deletePortfolioBtn").addEventListener("click", function() {
+  if (!pendingRenamePortfolioId) return;
+
+  if (portfolios.length <= 1) {
+    showAppAlert("Can’t Delete", "You need at least one portfolio.");
+    return;
+  }
+
+  const portfolio = portfolios.find(p => p.id === pendingRenamePortfolioId);
+  if (!portfolio) return;
+
+  showAppConfirm(
+    "Delete Portfolio?",
+    "This will delete the entire portfolio and all transactions inside it.",
+    function() {
+      showAppConfirm(
+        "Are You Absolutely Sure?",
+        "This cannot be undone. The portfolio and its transaction history will be permanently removed.",
+        function() {
+          localStorage.removeItem("lctTransactionsV1_" + pendingRenamePortfolioId);
+
+          portfolios = portfolios.filter(p => p.id !== pendingRenamePortfolioId);
+          localStorage.setItem(PORTFOLIOS_KEY, JSON.stringify(portfolios));
+
+          if (activePortfolioId === pendingRenamePortfolioId) {
+            activePortfolioId = portfolios[0].id;
+            localStorage.setItem(ACTIVE_PORTFOLIO_KEY, activePortfolioId);
+          }
+
+          pendingRenamePortfolioId = null;
+
+          document.getElementById("renamePortfolioModal").style.display = "none";
+          document.getElementById("portfolioPickerModal").style.display = "none";
+
+          transactions = loadTransactions();
+
+          transactionIdCounter =
+            transactions.length > 0
+              ? Math.max(...transactions.map(t => t.id)) + 1
+              : 1;
+
+          sortTransactionsNewestFirst();
+          recalculatePortfolioState();
+          updatePortfolioHeader();
+          renderHoldings();
+          renderTransactionTables();
+          updateSettingsPanel();
+          renderPortfolioMenu();
+          renderPortfolioPicker();
+
+          const activeMode = document.querySelector(".chartMode.active")?.dataset.mode || "all";
+          requestChartRender(activeMode);
+
+          showAppAlert("Portfolio Deleted", "The portfolio was deleted.");
+        }
+      );
+    }
+  );
+});
+
+const priceEngineCache = {
+  live: {},
+  intraday: {},
+  daily: {}
+};
+
+function clearPriceEngineChartCache() {
+  priceEngineCache.intraday = {};
+  priceEngineCache.daily = {};
+  setApiStatus("chart", "Chart: API cache cleared", "apiStatusWarn");
+}
+
+function countPriceEngineCachedPoints() {
+  let count = 0;
+
+  Object.values(priceEngineCache.intraday || {}).forEach(points => {
+    if (Array.isArray(points)) count += points.length;
+  });
+
+  Object.values(priceEngineCache.daily || {}).forEach(map => {
+    if (map && typeof map === "object") count += Object.keys(map).length;
+  });
+
+  return count;
+}
+
+
+function localDateFromInput(value) {
+  const [year, month, day] = String(value || "").split("-").map(Number);
+
+  if (!year || !month || !day) {
+    return null;
+  }
+
+  return new Date(year, month - 1, day);
+}
+
+function pad2(value) {
+  return String(value).padStart(2, "0");
+}
+
+function formatDateInput(date) {
+  if (!(date instanceof Date) || isNaN(date.getTime())) return "";
+
+  return (
+    date.getFullYear() + "-" +
+    pad2(date.getMonth() + 1) + "-" +
+    pad2(date.getDate())
+  );
+}
+
+function formatTimeInput(date) {
+  if (!(date instanceof Date) || isNaN(date.getTime())) return "";
+
+  return pad2(date.getHours()) + ":" + pad2(date.getMinutes());
+}
+
+function createLocalTimestampFromInputs(dateValue, timeValue) {
+  const date = localDateFromInput(dateValue);
+  const time = String(timeValue || "").trim();
+
+  if (!date || isNaN(date.getTime()) || !time) {
+    return null;
+  }
+
+  const parts = time.split(":").map(Number);
+  const hours = Number(parts[0]);
+  const minutes = Number(parts[1]);
+  const seconds = Number(parts[2] || 0);
+
+  if (
+    !Number.isFinite(hours) ||
+    !Number.isFinite(minutes) ||
+    hours < 0 ||
+    hours > 23 ||
+    minutes < 0 ||
+    minutes > 59 ||
+    seconds < 0 ||
+    seconds > 59
+  ) {
+    return null;
+  }
+
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    hours,
+    minutes,
+    seconds,
+    0
+  );
+}
+
+function parseStoredTimestamp(value) {
+  const date = new Date(value);
+
+  if (!(date instanceof Date) || isNaN(date.getTime())) {
+    return null;
+  }
+
+  return date;
+}
+
+function getTxTimestampDate(tx) {
+  if (!tx || !tx.timestamp) return null;
+
+  const parsed = parseStoredTimestamp(tx.timestamp);
+  return parsed;
+}
+
+function getTxTimestampMs(tx) {
+  const parsed = getTxTimestampDate(tx);
+  return parsed ? parsed.getTime() : NaN;
+}
+
+function getTxLocalDate(tx) {
+  const timestampDate = getTxTimestampDate(tx);
+
+  if (!timestampDate) {
+    return null;
+  }
+
+  return dateOnly(timestampDate);
+}
+
+function normalizeTransactionForRuntime(t) {
+  const timestampDate = parseStoredTimestamp(t && t.timestamp);
+
+  if (!timestampDate) {
+    return null;
+  }
+
+  return {
+    id: Number(t.id) || 0,
+    timestamp: timestampDate.toISOString(),
+    date: dateOnly(timestampDate),
+    coin: t.coin || "KAS",
+    type: t.type,
+    amount: Number(t.amount) || 0,
+    price: Number(t.price) || 0,
+    total: Number(t.total) || 0,
+    notes: t.notes || ""
+  };
+}
+
+function todayLocalDate() {
+  const today = new Date();
+  return new Date(today.getFullYear(), today.getMonth(), today.getDate());
+}
+
+function dateOnly(d) {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+function money(n) {
+  return "$" + n.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
+
+
+function price(n) {
+  return "$" + n.toFixed(5);
+}
+
+function updateSettingsPanel() {
+  const txCountEl = document.getElementById("settingsTxCount");
+  const updatedEl = document.getElementById("settingsLastUpdated");
+  const sourceEl = document.getElementById("settingsPriceSource");
+  const cacheEl = document.getElementById("settingsApiCache");
+
+  if (txCountEl) {
+    txCountEl.textContent = transactions.length.toLocaleString();
+  }
+
+  if (updatedEl) {
+    const latestLiveUpdate = getLatestLivePriceUpdatedAt();
+
+    if (latestLiveUpdate) {
+      updatedEl.textContent =
+        new Date(latestLiveUpdate).toLocaleTimeString([], {
+          hour: "numeric",
+          minute: "2-digit"
+        });
+    } else {
+      updatedEl.textContent = "--";
+    }
+  }
+
+  if (cacheEl) {
+    const cachedPoints = typeof countPriceEngineCachedPoints === "function"
+      ? countPriceEngineCachedPoints()
+      : 0;
+
+    cacheEl.textContent =
+      cachedPoints > 0
+        ? "Price cache: " + cachedPoints.toLocaleString() + " points"
+        : "Price cache: empty";
+  }
+
+  if (sourceEl) {
+    const liveCoinCount = Object.keys(livePrices)
+      .filter(symbol => livePrices[symbol] && Number(livePrices[symbol].price) > 0)
+      .length;
+
+    sourceEl.textContent =
+      liveCoinCount > 0
+        ? "Source: Live APIs · " + liveCoinCount + " coins"
+        : "Source: No live prices loaded";
+  }
+}
+
+const OLD_STORAGE_KEY = "lctTransactionsV1";
+const PORTFOLIOS_KEY = "lctPortfoliosV1";
+const ACTIVE_PORTFOLIO_KEY = "lctActivePortfolioV1";
+
+let portfolios = JSON.parse(localStorage.getItem(PORTFOLIOS_KEY) || "[]");
+
+if (portfolios.length === 0) {
+  portfolios = [{ id: "main", name: "My Portfolio" }];
+  localStorage.setItem(PORTFOLIOS_KEY, JSON.stringify(portfolios));
+  localStorage.setItem(ACTIVE_PORTFOLIO_KEY, "main");
+}
+
+let activePortfolioId =
+  localStorage.getItem(ACTIVE_PORTFOLIO_KEY) || portfolios[0].id;
+
+function getActivePortfolio() {
+  return portfolios.find(p => p.id === activePortfolioId) || portfolios[0];
+}
+
+function getStorageKey() {
+  return "lctTransactionsV1_" + activePortfolioId;
+}
+
+function saveTransactions() {
+  localStorage.setItem(getStorageKey(), JSON.stringify(
+    transactions
+      .filter(t => t && t.timestamp && parseStoredTimestamp(t.timestamp))
+      .map(t => ({
+        id: t.id,
+        timestamp: parseStoredTimestamp(t.timestamp).toISOString(),
+        date: dateKeyFromDate(getTxLocalDate(t)),
+        coin: t.coin || "KAS",
+        type: t.type,
+        amount: t.amount,
+        price: t.price,
+        total: t.total,
+        notes: t.notes || ""
+      }))
+  ));
+}
+
+function loadTransactions() {
+ let saved = localStorage.getItem(getStorageKey());
+
+if (!saved && activePortfolioId === "main") {
+  saved = localStorage.getItem(OLD_STORAGE_KEY);
+}
+
+  if (!saved) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(saved);
+
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed
+      .map(normalizeTransactionForRuntime)
+      .filter(Boolean);
+  } catch (e) {
+    return [];
+  }
+}
+
+let transactions = loadTransactions();
+loadHistoricalPrices();
+
+function renderPortfolioMenu() {
+  const title = document.getElementById("portfolioTitle");
+  const list = document.getElementById("portfolioList");
+
+  if (!title || !list) return;
+
+  const active = getActivePortfolio();
+  document.getElementById("portfolioTitleText").textContent = active.name;
+
+  list.innerHTML = portfolios.map(p => `
+  <div class="portfolioItem ${p.id === activePortfolioId ? "active" : ""}" data-id="${p.id}">
+    <span class="portfolioName">${p.name}</span>
+    <button class="editPortfolioBtn" data-id="${p.id}" title="Rename portfolio">✎</button>
+  </div>
+`).join("");
+}
+
+function switchPortfolio(id) {
+  activePortfolioId = id;
+  localStorage.setItem(ACTIVE_PORTFOLIO_KEY, id);
+
+  transactions = loadTransactions();
+
+  transactionIdCounter =
+    transactions.length > 0
+      ? Math.max(...transactions.map(t => t.id)) + 1
+      : 1;
+
+  sortTransactionsNewestFirst();
+  recalculatePortfolioState();
+  updatePortfolioHeader();
+  renderHoldings();
+  renderTransactionTables();
+  updateSettingsPanel();
+
+  const activeMode = document.querySelector(".chartMode.active")?.dataset.mode || "all";
+  requestChartRender(activeMode);
+
+  renderPortfolioMenu();
+  document.getElementById("portfolioMenu").classList.remove("open");
+}
+
+function renderPortfolioPicker() {
+  const list = document.getElementById("portfolioPickerList");
+
+  list.innerHTML = portfolios.map(p => `
+    <div class="portfolioPickerRow ${p.id === activePortfolioId ? "active" : ""}" data-id="${p.id}">
+      <div class="portfolioPickerName">${p.name}</div>
+      <button class="portfolioPickerEdit" data-id="${p.id}">✎</button>
+    </div>
+  `).join("");
+}
+
+function openPortfolioPickerModal() {
+  renderPortfolioPicker();
+  document.getElementById("portfolioPickerModal").style.display = "flex";
+}
+
+document.getElementById("closePortfolioPicker").addEventListener("click", function() {
+  document.getElementById("portfolioPickerModal").style.display = "none";
+});
+
+document.getElementById("addCoinLogoInput").addEventListener("change", async function() {
+  const file = this.files && this.files[0];
+
+  if (!file) {
+    pendingAddCoinLogoData = "";
+    return;
+  }
+
+  try {
+    pendingAddCoinLogoData = await readFileAsDataURL(file);
+    document.getElementById("addCoinStatus").textContent = "Logo loaded.";
+  } catch (e) {
+    pendingAddCoinLogoData = "";
+    document.getElementById("addCoinStatus").textContent = "Logo could not be loaded.";
+  }
+});
+
+document.getElementById("addCoinCsvInput").addEventListener("change", function() {
+  const file = this.files && this.files[0];
+
+  if (!file) {
+    pendingAddCoinCsvData = null;
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+    pendingAddCoinCsvData = e.target.result || "";
+    document.getElementById("addCoinStatus").textContent = "CSV loaded.";
+  };
+
+  reader.onerror = function() {
+    pendingAddCoinCsvData = null;
+    document.getElementById("addCoinStatus").textContent = "CSV could not be loaded. Coin can still be added.";
+  };
+
+  reader.readAsText(file);
+});
+
+document.getElementById("saveAddCoin").addEventListener("click", async function() {
+  const symbol = normalizeCoinSymbol(document.getElementById("addCoinSymbol").value);
+  const name = document.getElementById("addCoinName").value.trim();
+  const coinGeckoId = document.getElementById("addCoinGeckoId").value.trim();
+  const coinPaprikaId = document.getElementById("addCoinPaprikaId").value.trim();
+  const logoScale = Number(document.getElementById("addCoinLogoScale")?.value || 1);
+
+  if (!symbol) {
+    showAppAlert("Missing Symbol", "Enter a coin symbol first.");
+    return;
+  }
+
+  if (!name) {
+    showAppAlert("Missing Name", "Enter a coin name first.");
+    return;
+  }
+
+  const isEditing = editingCoinSymbol !== null;
+  const oldSymbol = editingCoinSymbol;
+  const editingBuiltIn = isEditing && DEFAULT_COINS[oldSymbol];
+
+  if (!isEditing && DEFAULT_COINS[symbol]) {
+    showAppAlert("Coin Already Exists", symbol + " is already built into the app.");
+    return;
+  }
+
+  if (!isEditing && customCoins[symbol]) {
+    showAppAlert("Coin Already Exists", symbol + " already exists in your custom coins.");
+    return;
+  }
+
+  if (isEditing && editingBuiltIn && symbol !== oldSymbol) {
+    showAppAlert("Symbol Locked", "Built-in coin symbols cannot be changed.");
+    return;
+  }
+
+  if (isEditing && symbol !== oldSymbol && (DEFAULT_COINS[symbol] || customCoins[symbol])) {
+    showAppAlert("Coin Already Exists", symbol + " already exists.");
+    return;
+  }
+
+  const assetLogo = !pendingAddCoinLogoData && !editingCoinOriginalLogo
+    ? await findAssetLogoForSymbol(symbol)
+    : "";
+
+  const logo =
+    pendingAddCoinLogoData ||
+    editingCoinOriginalLogo ||
+    assetLogo ||
+    makeFallbackCoinLogo(symbol);
+
+  let parsedHistoricalCsv = null;
+
+  if (pendingAddCoinCsvData !== null) {
+    parsedHistoricalCsv = parseHistoricalCsvText(pendingAddCoinCsvData);
+
+    if (parsedHistoricalCsv.error) {
+      showAppAlert("Historical CSV Error", parsedHistoricalCsv.error);
+      return;
+    }
+  }
+
+  const updatedCoin = {
+    name,
+    coinGeckoId,
+    coinPaprikaId,
+    logo,
+    logoScale: logoScale > 0 ? logoScale : 1
+  };
+
+  if (isEditing) {
+    if (symbol !== oldSymbol) {
+      customCoins[symbol] = updatedCoin;
+      delete customCoins[oldSymbol];
+
+      transactions.forEach(t => {
+        if (String(t.coin || "KAS").toUpperCase() === oldSymbol) {
+          t.coin = symbol;
+        }
+      });
+
+      saveTransactions();
+    } else {
+      customCoins[symbol] = updatedCoin;
+    }
+  } else {
+    customCoins[symbol] = updatedCoin;
+  }
+
+  if (isEditing && symbol !== oldSymbol && customHistoricalPrices[oldSymbol]) {
+    customHistoricalPrices[symbol] = customHistoricalPrices[oldSymbol];
+    delete customHistoricalPrices[oldSymbol];
+  }
+
+  if (parsedHistoricalCsv) {
+    customHistoricalPrices[symbol] = parsedHistoricalCsv.prices;
+  }
+
+  saveCustomCoins();
+  saveCustomHistoricalPrices();
+  rebuildCoins();
+  loadHistoricalPrices();
+
+  if (coinGeckoId || coinPaprikaId) {
+    await refreshLivePriceForCoin(symbol);
+  }
+
+  resetAddCoinModal();
+  document.getElementById("addCoinModal").style.display = "none";
+
+  refreshAfterCoinEdit(symbol);
+
+  showAppAlert(
+    isEditing ? "Coin Updated" : "Coin Added",
+    symbol + " is ready to use."
+  );
+});
+
+document.getElementById("portfolioPickerList").addEventListener("click", function(e) {
+  const editBtn = e.target.closest(".portfolioPickerEdit");
+
+  if (editBtn) {
+    e.stopPropagation();
+    openRenamePortfolioModal(editBtn.dataset.id);
+    return;
+  }
+
+  const row = e.target.closest(".portfolioPickerRow");
+  if (!row) return;
+
+  switchPortfolio(row.dataset.id);
+  document.getElementById("portfolioPickerModal").style.display = "none";
+});
+
+document.getElementById("pickerCreatePortfolioBtn").addEventListener("click", function() {
+  const input = document.getElementById("pickerNewPortfolioName");
+  const name = input.value.trim();
+
+  if (!name) return;
+
+  const id = "portfolio_" + Date.now();
+
+  portfolios.push({ id, name });
+  localStorage.setItem(PORTFOLIOS_KEY, JSON.stringify(portfolios));
+
+  input.value = "";
+  switchPortfolio(id);
+
+  renderPortfolioPicker();
+  document.getElementById("portfolioPickerModal").style.display = "none";
+});
+
+document.getElementById("portfolioTitle").addEventListener("click", function(e) {
+  e.stopPropagation();
+  openPortfolioPickerModal();
+});
+
+document.getElementById("portfolioList").addEventListener("click", function(e) {
+  const editBtn = e.target.closest(".editPortfolioBtn");
+
+ if (editBtn) {
+  e.stopPropagation();
+
+  const id = editBtn.dataset.id;
+
+  openRenamePortfolioModal(id);
+  return;
+}
+
+  const item = e.target.closest(".portfolioItem");
+  if (!item) return;
+
+  switchPortfolio(item.dataset.id);
+});
+
+document.getElementById("createPortfolioBtn").addEventListener("click", function() {
+  const input = document.getElementById("newPortfolioName");
+  const name = input.value.trim();
+
+  if (!name) return;
+
+  const id = "portfolio_" + Date.now();
+
+  portfolios.push({ id, name });
+  localStorage.setItem(PORTFOLIOS_KEY, JSON.stringify(portfolios));
+
+  input.value = "";
+  switchPortfolio(id);
+});
+
+document.addEventListener("click", function(e) {
+  if (!e.target.closest(".portfolioTitleWrap")) {
+    document.getElementById("portfolioMenu").classList.remove("open");
+  }
+});
+
+renderPortfolioMenu();
+
+let transactionIdCounter =
+  transactions.length > 0
+    ? Math.max(...transactions.map(t => t.id)) + 1
+    : 1;
+
+function sortTransactionsNewestFirst() {
+  transactions.sort((a, b) => {
+    const timeDiff = getTxTimestampMs(b) - getTxTimestampMs(a);
+    if (Number.isFinite(timeDiff) && timeDiff !== 0) return timeDiff;
+
+    return Number(b.id || 0) - Number(a.id || 0);
+  });
+}
+
+let holdings = 0;
+let invested = 0;
+let buys = 0;
+let sells = 0;
+let portfolioValue = 0;
+let profit = 0;
+let avgBuy = 0;
+let portfolioByCoin = {};
+
+function getCurrentValuePriceForCoin(coin) {
+  const symbol = normalizeCoinSymbol(coin || "KAS");
+
+  const live = getLivePriceForCoin(symbol);
+  if (live > 0) return live;
+
+  const todayPrice = getHistoricalPriceForCoin(symbol, new Date());
+  if (todayPrice > 0) return todayPrice;
+
+  return 0;
+}
+
+function recalculatePortfolioState() {
+  portfolioByCoin = {};
+
+  holdings = 0;
+  invested = 0;
+  buys = 0;
+  sells = 0;
+  portfolioValue = 0;
+  profit = 0;
+  avgBuy = 0;
+
+  transactions.forEach(t => {
+    const coin = String(t.coin || "KAS").toUpperCase();
+
+    if (!portfolioByCoin[coin]) {
+      portfolioByCoin[coin] = {
+        coin,
+        holdings: 0,
+        buyAmount: 0,
+        buyCost: 0,
+        invested: 0,
+        buys: 0,
+        sells: 0,
+        currentPrice: 0,
+        currentValue: 0,
+        profitLoss: 0,
+        avgCost: 0
+      };
+    }
+
+    const asset = portfolioByCoin[coin];
+    const amount = Number(t.amount || 0);
+    const total = Number(t.total || 0);
+
+    if (t.type === "Buy") {
+      asset.holdings += amount;
+      asset.buyAmount += amount;
+      asset.buyCost += total;
+      asset.buys++;
+      buys++;
+    }
+
+    else if (t.type === "Sell") {
+      asset.holdings -= amount;
+      asset.sells++;
+      sells++;
+    }
+
+    else if (t.type === "Transfer In") {
+      asset.holdings += amount;
+    }
+
+    else if (t.type === "Transfer Out") {
+      asset.holdings -= amount;
+    }
+  });
+
+  Object.keys(portfolioByCoin).forEach(coin => {
+    const asset = portfolioByCoin[coin];
+
+    if (Math.abs(asset.holdings) < 0.00000001) {
+      asset.holdings = 0;
+    }
+
+    asset.holdings = Math.max(0, asset.holdings);
+
+    const avgBuyCost =
+      asset.buyAmount > 0
+        ? asset.buyCost / asset.buyAmount
+        : 0;
+
+    asset.invested =
+      asset.holdings > 0
+        ? asset.holdings * avgBuyCost
+        : 0;
+
+    asset.currentPrice = getCurrentValuePriceForCoin(coin);
+    asset.currentValue = asset.holdings * asset.currentPrice;
+    asset.avgCost = asset.holdings > 0 ? asset.invested / asset.holdings : 0;
+    asset.profitLoss = asset.currentValue - asset.invested;
+
+    holdings += asset.holdings;
+    invested += asset.invested;
+    portfolioValue += asset.currentValue;
+    profit += asset.profitLoss;
+  });
+
+  if (Math.abs(holdings) < 0.00000001) holdings = 0;
+  if (Math.abs(invested) < 0.00000001) invested = 0;
+  if (Math.abs(portfolioValue) < 0.00000001) portfolioValue = 0;
+
+  holdings = Math.max(0, holdings);
+  invested = Math.max(0, invested);
+  portfolioValue = Math.max(0, portfolioValue);
+
+  avgBuy = holdings > 0 ? invested / holdings : 0;
+
+}
+
+function updatePortfolioHeader() {
+  const portfolioValueEl = document.getElementById("portfolioValue");
+  const dayChangeEl = document.getElementById("dayChange");
+
+  portfolioValueEl.textContent = money(portfolioValue);
+
+  if (!transactions || transactions.length === 0 || portfolioValue <= 0) {
+    dayChangeEl.textContent = "No transactions yet";
+    dayChangeEl.className = "dayChange";
+    dayChangeEl.style.color = "var(--muted)";
+    return;
+  }
+
+  let currentTotal = 0;
+  let previousTotal = 0;
+  let hasAnyChangeData = false;
+
+  Object.values(portfolioByCoin).forEach(asset => {
+    const coin = String(asset.coin || "KAS").toUpperCase();
+    const amount = Number(asset.holdings || 0);
+
+    if (amount <= 0) return;
+
+    const currentPrice = getCurrentValuePriceForCoin(coin);
+    if (currentPrice <= 0) return;
+
+    let change24h = 0;
+
+    if (
+      livePrices[coin] &&
+      Number.isFinite(Number(livePrices[coin].change24h))
+    ) {
+      change24h = Number(livePrices[coin].change24h);
+      hasAnyChangeData = true;
+    }
+
+    const previousPrice =
+      change24h !== -100
+        ? currentPrice / (1 + change24h / 100)
+        : currentPrice;
+
+    currentTotal += amount * currentPrice;
+    previousTotal += amount * previousPrice;
+  });
+
+  if (currentTotal <= 0 || previousTotal <= 0 || !hasAnyChangeData) {
+    dayChangeEl.textContent = "24h: " + money(0);
+    dayChangeEl.className = "dayChange";
+    dayChangeEl.style.color = "var(--muted)";
+    return;
+  }
+
+  const changeValue = currentTotal - previousTotal;
+  const changePercent = previousTotal !== 0 ? (changeValue / previousTotal) * 100 : 0;
+
+  const sign = changeValue >= 0 ? "+" : "-";
+  const arrow = changeValue >= 0 ? "▲" : "▼";
+  const colorClass = changeValue >= 0 ? "green" : "red";
+
+  dayChangeEl.textContent =
+    "24h: " +
+    sign +
+    money(Math.abs(changeValue)) +
+    " (" +
+    arrow +
+    " " +
+    Math.abs(changePercent).toFixed(2) +
+    "%)";
+
+  dayChangeEl.className = "dayChange " + colorClass;
+  dayChangeEl.style.color = "";
+}
+
+function calculateHoldingsSummary() {
+  return Object.values(portfolioByCoin)
+    .map(asset => {
+      let safeHoldings = Number(asset.holdings || 0);
+
+      if (Math.abs(safeHoldings) < 0.00000001) {
+        safeHoldings = 0;
+      }
+
+      safeHoldings = Math.max(0, safeHoldings);
+
+      const safeCostBasis =
+        safeHoldings > 0
+          ? Math.max(0, Number(asset.invested || 0))
+          : 0;
+
+      const safeCurrentValue =
+        safeHoldings > 0
+          ? Math.max(0, Number(asset.currentValue || 0))
+          : 0;
+
+      const safeProfitLoss = safeCurrentValue - safeCostBasis;
+
+      return {
+        coin: asset.coin,
+        holdings: safeHoldings,
+        currentValue: safeCurrentValue,
+        costBasis: safeCostBasis,
+        avgCost: safeHoldings > 0 ? safeCostBasis / safeHoldings : 0,
+        profitLoss: safeProfitLoss,
+        allocation: portfolioValue > 0 ? (safeCurrentValue / portfolioValue) * 100 : 0
+      };
+    })
+    .filter(asset =>
+      asset.holdings > 0.00000001 ||
+      asset.currentValue > 0.00000001 ||
+      asset.costBasis > 0.00000001
+    )
+    .sort((a, b) => b.currentValue - a.currentValue);
+}
+
+function renderHoldings() {
+  const rows = calculateHoldingsSummary();
+  const holdingsRows = document.getElementById("holdingsRows");
+  if (!holdingsRows) return;
+
+  holdingsRows.innerHTML = rows.map(asset => {
+    const coinInfo = getCoinInfo(asset.coin);
+    const plClass = asset.profitLoss >= 0 ? "green" : "red";
+    const plSign = asset.profitLoss >= 0 ? "+" : "-";
+
+    return `
+      <tr>
+        <td><span class="coinTxType">${coinLogoHtml(asset.coin)}<span>${asset.coin}</span></span></td>
+        <td>${formatCoinAmount(asset.holdings, asset.coin)}</td>
+        <td>${money(asset.currentValue)}</td>
+        <td>${money(asset.costBasis)}</td>
+        <td>${formatTxPrice(asset.avgCost)}</td>
+        <td class="${plClass}">${plSign}${money(Math.abs(asset.profitLoss))}</td>
+        <td>${asset.allocation.toFixed(2)}%</td>
+      </tr>
+    `;
+  }).join("");
+}
+
+sortTransactionsNewestFirst();
+recalculatePortfolioState();
+
+
+
+updatePortfolioHeader();
+renderHoldings();
+
+function getCoinInfo(symbol) {
+  const cleanSymbol = String(symbol || "Unknown").toUpperCase();
+
+  return COINS[cleanSymbol] || {
+    name: cleanSymbol,
+    logo: makeFallbackCoinLogo(cleanSymbol),
+    logoScale: 1
+  };
+}
+
+function coinLogoHtml(coin) {
+  const symbol = String(coin || "KAS").toUpperCase();
+  const coinInfo = getCoinInfo(symbol);
+  const scale = Number(coinInfo.logoScale || 1);
+
+  return `
+    <span class="coinLogoFrame">
+      <img
+        class="coinLogoImg"
+        src="${coinInfo.logo}"
+        alt="${symbol}"
+        onerror="this.onerror=null; this.src='${makeFallbackCoinLogo(symbol)}';"
+        style="transform: scale(${scale});"
+      >
+    </span>
+  `;
+}
+
+function makeFallbackCoinLogo(symbol) {
+  const clean = String(symbol || "?").toUpperCase().slice(0, 2);
+
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+      <circle cx="48" cy="48" r="44" fill="#4767ff"/>
+      <text x="48" y="56" text-anchor="middle" font-size="30" font-family="Arial, sans-serif" font-weight="800" fill="white">${clean}</text>
+    </svg>
+  `;
+
+  return "data:image/svg+xml;base64," + btoa(svg);
+}
+
+function formatCoinAmount(amount, coin) {
+  const symbol = String(coin || "").toUpperCase();
+
+  if (symbol === "BTC") {
+    return Number(amount).toLocaleString(undefined, {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 8
+    });
+  }
+
+  return Number(amount).toLocaleString(undefined, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2
+  });
+}
+
+function formatTxPrice(value) {
+  const n = Number(value || 0);
+
+  if (n >= 1) {
+    return "$" + n.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+
+  return "$" + n.toLocaleString(undefined, {
+    minimumFractionDigits: 5,
+    maximumFractionDigits: 5
+  });
+}
+
+function rowHtml(t, index) {
+  const isPositive = t.type === "Buy" || t.type === "Transfer In";
+  const color = isPositive ? "green" : "red";
+  const sign = isPositive ? "+" : "-";
+
+  const coin = String(t.coin || "KAS").toUpperCase();
+  const timestampDate = getTxTimestampDate(t);
+
+  const dateText = timestampDate
+    ? timestampDate.toLocaleDateString(undefined, {month:"short", day:"numeric", year:"numeric"})
+    : "Invalid date";
+
+  return `
+    <tr class="txRow" data-id="${t.id}">
+      <td>${dateText}</td>
+      <td>
+        <span class="coinTxType">
+          ${coinLogoHtml(coin)}
+          <span class="${color}">${t.type}</span>
+        </span>
+      </td>
+      <td>${formatCoinAmount(t.amount, coin)} ${coin}</td>
+      <td>${formatTxPrice(t.price)}</td>
+      <td class="${color}">${sign}${money(t.total)}</td>
+    </tr>
+  `;
+}
+
+let valueChart;
+let chartLocked = false;
+const hoverGuidePlugin = {
+  id: "hoverGuidePlugin",
+
+  afterEvent(chart, args) {
+    const e = args.event;
+
+    if (e.type === "mousemove") {
+      chart.$hoverX = e.x;
+      chart.draw();
+    }
+
+    if (e.type === "mouseout") {
+      chart.$hoverX = null;
+    }
+  },
+
+  afterDatasetsDraw(chart) {
+    if (chartLocked) return;
+    if (!chart.$hoverX) return;
+
+    const data = chart.data.datasets[0].data;
+
+    if (!data || data.every(v => v === 0)) return;
+
+    const ctx = chart.ctx;
+    const meta = chart.getDatasetMeta(0);
+    const points = meta.data;
+    if (!points || points.length < 2) return;
+
+    const x = Math.max(
+  chart.chartArea.left,
+  Math.min(chart.$hoverX, chart.chartArea.right)
+	);
+    const topY = chart.chartArea.top;
+    const bottomY = chart.chartArea.bottom;
+
+    let left = points[0];
+    let right = points[points.length - 1];
+
+    for (let i = 0; i < points.length - 1; i++) {
+      if (x >= points[i].x && x <= points[i + 1].x) {
+        left = points[i];
+        right = points[i + 1];
+        break;
+      }
+    }
+
+    const range = right.x - left.x || 1;
+    const percent = (x - left.x) / range;
+    const y = left.y + (right.y - left.y) * percent;
+
+    ctx.save();
+
+    ctx.beginPath();
+    ctx.setLineDash([4, 6]);
+    ctx.moveTo(x, topY);
+    ctx.lineTo(x, bottomY);
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = "rgba(255,255,255,0.22)";
+    ctx.stroke();
+
+    ctx.setLineDash([]);
+
+    ctx.beginPath();
+    ctx.arc(x, y, 7, 0, Math.PI * 2);
+    ctx.fillStyle = "#0f1117";
+    ctx.fill();
+
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "#ffffff";
+    ctx.stroke();
+
+    ctx.restore();
+  }
+};
+
+const modeSettings = {
+  "24h": { points: 288 },
+  "7d": { points: 8 },
+  "30d": { points: 31 },
+  "90d": { points: 91 },
+  "1y": { points: 366 },
+  "all": { points: 300 }
+};
+
+function makeHoverLabel(mode, index, totalPoints) {
+  return "";
+}
+
+
+function dateKeyFromDate(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+async function setTxPriceFromSelectedDate(selectedDate) {
+  const coin = String(document.getElementById("editCoin")?.value || "KAS").toUpperCase();
+  const priceInput = document.getElementById("editPrice");
+
+  if (!priceInput || !selectedDate) return;
+
+  let bestPrice = getBestPriceForCoin(coin, selectedDate);
+
+  if (bestPrice > 0) {
+    priceInput.value = Number(bestPrice).toFixed(5);
+    return;
+  }
+
+  priceInput.value = "";
+
+  const selectedIsToday =
+    dateOnly(selectedDate).getTime() === todayLocalDate().getTime();
+
+  if (!selectedIsToday) return;
+
+  const live = await refreshLivePriceForCoin(coin);
+
+  if (live && String(document.getElementById("editCoin")?.value || "").toUpperCase() === coin) {
+    priceInput.value = Number(live.price).toFixed(5);
+  }
+}
+
+function getBuiltInHistoricalPricesForSymbol(symbol) {
+  const cleanSymbol = normalizeCoinSymbol(symbol);
+
+  try {
+    if (cleanSymbol === "KAS" && typeof kasPrices !== "undefined") return kasPrices;
+    if (cleanSymbol === "BTC" && typeof btcPrices !== "undefined") return btcPrices;
+    if (cleanSymbol === "ETH" && typeof ethPrices !== "undefined") return ethPrices;
+    if (cleanSymbol === "SOL" && typeof solPrices !== "undefined") return solPrices;
+    if (cleanSymbol === "XMR" && typeof xmrPrices !== "undefined") return xmrPrices;
+    if (cleanSymbol === "LTC" && typeof ltcPrices !== "undefined") return ltcPrices;
+    if (cleanSymbol === "ZEC" && typeof zecPrices !== "undefined") return zecPrices;
+    if (cleanSymbol === "BCH" && typeof bchPrices !== "undefined") return bchPrices;
+    if (cleanSymbol === "BSV" && typeof bsvPrices !== "undefined") return bsvPrices;
+  } catch (e) {}
+
+  return null;
+}
+
+function loadHistoricalPrices() {
+  historicalPrices = {};
+
+  Object.keys(COINS).forEach(symbol => {
+    const cleanSymbol = normalizeCoinSymbol(symbol);
+    const builtInPrices = getBuiltInHistoricalPricesForSymbol(cleanSymbol);
+
+    if (builtInPrices && typeof builtInPrices === "object") {
+      historicalPrices[cleanSymbol] = builtInPrices;
+      return;
+    }
+
+    if (customHistoricalPrices[cleanSymbol]) {
+      historicalPrices[cleanSymbol] = customHistoricalPrices[cleanSymbol];
+    }
+  });
+
+  setApiStatus("local", summarizeLocalHistoricalStatus(), "apiStatusOk");
+}
+
+function getHistoricalPriceForCoin(coin, date) {
+  const symbol = normalizeCoinSymbol(coin || "");
+  const key = dateKeyFromDate(date);
+
+  if (
+    historicalPrices[symbol] &&
+    Number(historicalPrices[symbol][key]) > 0
+  ) {
+    return Number(historicalPrices[symbol][key]);
+  }
+
+  return null;
+}
+
+function normalizeLivePriceRecord(record) {
+  if (!record || typeof record !== "object") return null;
+
+  const price = Number(record.price);
+  if (!(price > 0)) return null;
+
+  return {
+    price,
+    change24h: Number.isFinite(Number(record.change24h))
+      ? Number(record.change24h)
+      : 0,
+    source: record.source || "Saved",
+    updatedAt: Number(record.updatedAt || record.updated || Date.now())
+  };
+}
+
+function getCoinSymbolsForPriceEngine() {
+  const symbols = new Set();
+
+  (transactions || []).forEach(tx => {
+    const symbol = normalizeCoinSymbol(tx.coin || "KAS");
+    if (symbol) symbols.add(symbol);
+  });
+
+  if (!symbols.size) {
+    Object.keys(COINS || {}).forEach(symbol => symbols.add(normalizeCoinSymbol(symbol)));
+  }
+
+  return Array.from(symbols).filter(symbol => symbol && COINS[symbol]);
+}
+
+function getLivePriceRecordForCoin(coin) {
+  const symbol = normalizeCoinSymbol(coin || "");
+  if (!symbol) return null;
+  return normalizeLivePriceRecord(livePrices[symbol]);
+}
+
+function getLivePriceForCoin(coin) {
+  const record = getLivePriceRecordForCoin(coin);
+  return record ? record.price : 0;
+}
+
+function saveLastGoodLivePrices() {
+  const clean = {};
+
+  Object.keys(livePrices || {}).forEach(symbol => {
+    const record = normalizeLivePriceRecord(livePrices[symbol]);
+    if (record) clean[normalizeCoinSymbol(symbol)] = record;
+  });
+
+  localStorage.setItem(LAST_GOOD_LIVE_PRICES_KEY, JSON.stringify(clean));
+}
+
+function loadLastGoodLivePrices() {
+  livePrices = {};
+
+  try {
+    const saved = localStorage.getItem(LAST_GOOD_LIVE_PRICES_KEY);
+    const parsed = saved ? JSON.parse(saved) : {};
+
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      Object.keys(parsed).forEach(symbol => {
+        const cleanSymbol = normalizeCoinSymbol(symbol);
+        const record = normalizeLivePriceRecord(parsed[symbol]);
+        if (cleanSymbol && record) livePrices[cleanSymbol] = record;
+      });
+    }
+  } catch (e) {
+    setApiStatus("live", "Live: saved price load failed", "apiStatusWarn");
+  }
+
+  try {
+    const legacyKas = localStorage.getItem("lctLastGoodKasPriceV1");
+    const legacy = legacyKas ? JSON.parse(legacyKas) : null;
+    const legacyRecord = normalizeLivePriceRecord(legacy);
+
+    if (legacyRecord && !livePrices.KAS) {
+      livePrices.KAS = {
+        ...legacyRecord,
+        source: legacyRecord.source || "Saved Legacy KAS"
+      };
+
+      saveLastGoodLivePrices();
+    }
+  } catch (e) {}
+}
+
+async function priceEngineFetchJson(url, label, timeoutMs = 9000) {
+  setApiStatus("chart", label + ": requesting", "apiStatusWarn");
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timer);
+
+    if (!response.ok) {
+      throw new Error("HTTP " + response.status);
+    }
+
+    return await response.json();
+  } catch (err) {
+    clearTimeout(timer);
+    throw err;
+  }
+}
+
+function normalizeApiPoint(timestamp, priceValue) {
+  const date = new Date(timestamp);
+  const priceNum = Number(priceValue);
+
+  if (!(date instanceof Date) || isNaN(date.getTime()) || !(priceNum > 0)) {
+    return null;
+  }
+
+  return { date, price: priceNum };
+}
+
+function normalizeMarketChartPrices(data) {
+  if (!data || !Array.isArray(data.prices)) return [];
+
+  return data.prices
+    .map(point => normalizeApiPoint(point && point[0], point && point[1]))
+    .filter(Boolean)
+    .sort((a, b) => a.date.getTime() - b.date.getTime());
+}
+
+function bucketDailyApiPoints(points) {
+  const buckets = {};
+
+  (points || []).forEach(point => {
+    if (!point || !(point.date instanceof Date) || !(point.price > 0)) return;
+    const key = dateKeyFromDate(point.date);
+    buckets[key] = Number(point.price);
+  });
+
+  return buckets;
+}
+
+function getNearestIntradayPrice(points, targetDate) {
+  const list = Array.isArray(points) ? points : [];
+  const target = targetDate instanceof Date ? targetDate : new Date(targetDate);
+
+  if (!list.length || !(target instanceof Date) || isNaN(target.getTime())) return null;
+
+  const targetTime = target.getTime();
+  const first = list[0];
+  const last = list[list.length - 1];
+
+  if (targetTime <= first.date.getTime()) return Number(first.price) || null;
+  if (targetTime >= last.date.getTime()) return Number(last.price) || null;
+
+  let left = 0;
+  let right = list.length - 1;
+
+  while (right - left > 1) {
+    const mid = Math.floor((left + right) / 2);
+    if (list[mid].date.getTime() <= targetTime) left = mid;
+    else right = mid;
+  }
+
+  const before = list[left];
+  const after = list[right];
+  const beforeTime = before.date.getTime();
+  const afterTime = after.date.getTime();
+  const beforePrice = Number(before.price);
+  const afterPrice = Number(after.price);
+
+  if (!(beforePrice > 0) || !(afterPrice > 0) || afterTime === beforeTime) return null;
+
+  const ratio = (targetTime - beforeTime) / (afterTime - beforeTime);
+  return beforePrice + (afterPrice - beforePrice) * ratio;
+}
+
+async function fetchCoinGeckoLivePrice(symbol) {
+  const cleanSymbol = normalizeCoinSymbol(symbol);
+  const coin = COINS[cleanSymbol];
+  if (!coin || !coin.coinGeckoId) return null;
+
+  const url =
+    "https://api.coingecko.com/api/v3/simple/price?ids=" +
+    encodeURIComponent(coin.coinGeckoId) +
+    "&vs_currencies=usd&include_24hr_change=true";
+
+  const data = await priceEngineFetchJson(url, "Live CoinGecko " + cleanSymbol, 8000);
+  const item = data && data[coin.coinGeckoId];
+
+  if (!item || !(Number(item.usd) > 0)) {
+    throw new Error("empty live price");
+  }
+
+  return {
+    price: Number(item.usd),
+    change24h: Number(item.usd_24h_change || 0),
+    source: "CoinGecko",
+    updatedAt: Date.now()
+  };
+}
+
+async function fetchCoinPaprikaLivePrice(symbol) {
+  const cleanSymbol = normalizeCoinSymbol(symbol);
+  const coin = COINS[cleanSymbol];
+  if (!coin || !coin.coinPaprikaId) return null;
+
+  const url = "https://api.coinpaprika.com/v1/tickers/" + encodeURIComponent(coin.coinPaprikaId);
+  const data = await priceEngineFetchJson(url, "Live CoinPaprika " + cleanSymbol, 8000);
+  const usd = data && data.quotes && data.quotes.USD;
+
+  if (!usd || !(Number(usd.price) > 0)) {
+    throw new Error("empty live price");
+  }
+
+  return {
+    price: Number(usd.price),
+    change24h: Number(usd.percent_change_24h || 0),
+    source: "CoinPaprika",
+    updatedAt: Date.now()
+  };
+}
+
+async function refreshLivePriceForCoin(symbol) {
+  const cleanSymbol = normalizeCoinSymbol(symbol);
+  if (!cleanSymbol || !COINS[cleanSymbol]) return null;
+
+  try {
+    const cg = await fetchCoinGeckoLivePrice(cleanSymbol);
+    if (cg) {
+      livePrices[cleanSymbol] = cg;
+      setApiStatus("live", "Live: " + cleanSymbol + " CoinGecko OK $" + Number(cg.price).toLocaleString(), "apiStatusOk");
+      return cg;
+    }
+  } catch (err) {
+    setApiStatus("live", "Live: " + cleanSymbol + " CoinGecko failed (" + err.message + ")", "apiStatusWarn");
+  }
+
+  try {
+    const cp = await fetchCoinPaprikaLivePrice(cleanSymbol);
+    if (cp) {
+      livePrices[cleanSymbol] = cp;
+      setApiStatus("live", "Live: " + cleanSymbol + " CoinPaprika OK $" + Number(cp.price).toLocaleString(), "apiStatusOk");
+      return cp;
+    }
+  } catch (err) {
+    setApiStatus("live", "Live: " + cleanSymbol + " CoinPaprika failed (" + err.message + ")", "apiStatusBad");
+  }
+
+  return null;
+}
+
+async function refreshAllLivePrices(options = {}) {
+  const settings = {
+    renderChart: false,
+    preserveScroll: true,
+    ...options
+  };
+
+  const symbols = getCoinSymbolsForPriceEngine();
+  setApiStatus("overall", "Refreshing", "apiStatusWarn");
+  setApiStatus("live", "Live: refreshing " + symbols.length + " active coins");
+
+  const results = await Promise.all(symbols.map(symbol => refreshLivePriceForCoin(symbol)));
+  const loadedCount = results.filter(Boolean).length;
+
+  if (loadedCount > 0) {
+    setApiStatus("overall", loadedCount === symbols.length ? "OK" : "Partial", loadedCount === symbols.length ? "apiStatusOk" : "apiStatusWarn");
+    setApiStatus("live", "Live: " + loadedCount + "/" + symbols.length + " active coins loaded", loadedCount === symbols.length ? "apiStatusOk" : "apiStatusWarn");
+  } else {
+    setApiStatus("overall", "API failed", "apiStatusBad");
+    setApiStatus("live", "Live: failed for all active coins", "apiStatusBad");
+  }
+
+  saveLastGoodLivePrices();
+
+  const updateUi = () => {
+    updateSettingsPanel();
+    recalculatePortfolioState();
+    updatePortfolioHeader();
+    renderHoldings();
+
+    if (settings.renderChart) {
+      const activeMode = document.querySelector(".chartMode.active")?.dataset.mode || "all";
+      requestChartRender(activeMode);
+    }
+  };
+
+  if (settings.preserveScroll) preserveScrollPosition(updateUi);
+  else updateUi();
+}
+
+function getLatestLivePriceUpdatedAt() {
+  const updates = Object.values(livePrices)
+    .map(item => Number(item && item.updatedAt))
+    .filter(value => Number.isFinite(value) && value > 0);
+
+  return updates.length ? Math.max(...updates) : null;
+}
+
+function getBestPriceForCoin(coin, date) {
+  const symbol = normalizeCoinSymbol(coin || "");
+  const selectedDate = date instanceof Date ? date : new Date(date);
+
+  if (!symbol || !(selectedDate instanceof Date) || isNaN(selectedDate.getTime())) return 0;
+
+  const selectedKey = dateKeyFromDate(selectedDate);
+  const todayKey = dateKeyFromDate(new Date());
+
+  if (selectedKey === todayKey) {
+    const live = getLivePriceForCoin(symbol);
+    if (live > 0) return live;
+  }
+
+  const historical = getHistoricalPriceForCoin(symbol, selectedDate);
+  if (historical > 0) return historical;
+
+  return 0;
+}
+
+function getCoinHoldingsAtTimestamp(timestamp) {
+  const targetDate = timestamp instanceof Date ? timestamp : new Date(timestamp);
+
+  if (!(targetDate instanceof Date) || isNaN(targetDate.getTime())) {
+    return {};
+  }
+
+  const targetTime = targetDate.getTime();
+  const coinHoldings = {};
+
+  transactions
+    .slice()
+    .sort((a, b) => getTxTimestampMs(a) - getTxTimestampMs(b))
+    .forEach(tx => {
+      const txTime = getTxTimestampMs(tx);
+
+      if (!Number.isFinite(txTime)) return;
+      if (txTime > targetTime) return;
+
+      const coin = String(tx.coin || "KAS").toUpperCase();
+      const amount = Number(tx.amount || 0);
+
+      if (!coinHoldings[coin]) {
+        coinHoldings[coin] = 0;
+      }
+
+      if (tx.type === "Buy") coinHoldings[coin] += amount;
+      else if (tx.type === "Sell") coinHoldings[coin] -= amount;
+      else if (tx.type === "Transfer In") coinHoldings[coin] += amount;
+      else if (tx.type === "Transfer Out") coinHoldings[coin] -= amount;
+
+      if (Math.abs(coinHoldings[coin]) < 0.00000001) {
+        coinHoldings[coin] = 0;
+      }
+    });
+
+  Object.keys(coinHoldings).forEach(coin => {
+    const value = Number(coinHoldings[coin] || 0);
+
+    if (!Number.isFinite(value) || value <= 0) {
+      delete coinHoldings[coin];
+      return;
+    }
+
+    coinHoldings[coin] = value;
+  });
+
+  return coinHoldings;
+}
+
+function isSameLocalDate(a, b) {
+  if (!(a instanceof Date) || !(b instanceof Date)) return false;
+  return dateKeyFromDate(a) === dateKeyFromDate(b);
+}
+
+function endOfChartDay(date) {
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    23,
+    59,
+    59,
+    999
+  );
+}
+
+function addLocalDays(date, days) {
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
+function getFirstTransactionTimestamp() {
+  const times = (transactions || [])
+    .map(tx => getTxTimestampMs(tx))
+    .filter(time => Number.isFinite(time) && time > 0);
+
+  if (!times.length) {
+    return new Date();
+  }
+
+  return new Date(Math.min(...times));
+}
+
+function getChartPointTimestampForDate(date) {
+  const today = todayLocalDate();
+  if (isSameLocalDate(date, today)) return new Date();
+  return endOfChartDay(date);
+}
+
+function getDailyChartStartDate(mode) {
+  const today = todayLocalDate();
+
+  if (mode === "7d") return addLocalDays(today, -7);
+  if (mode === "30d") return addLocalDays(today, -30);
+  if (mode === "90d") return addLocalDays(today, -90);
+  if (mode === "1y") return addLocalDays(today, -365);
+  if (mode === "all") return dateOnly(getFirstTransactionTimestamp());
+
+  return addLocalDays(today, -30);
+}
+
+function buildDailyDateList(mode) {
+  const today = todayLocalDate();
+  const start = getDailyChartStartDate(mode);
+  const dates = [];
+
+  let cursor = dateOnly(start);
+  let guard = 0;
+
+  while (cursor.getTime() <= today.getTime() && guard < 5000) {
+    dates.push(dateOnly(cursor));
+    cursor = addLocalDays(cursor, 1);
+    guard++;
+  }
+
+  const maxPoints = modeSettings[mode]?.points || dates.length;
+
+  if (mode === "all" && dates.length > maxPoints) {
+    const sampled = [];
+    for (let i = 0; i < maxPoints; i++) {
+      const index = Math.round((dates.length - 1) * (i / (maxPoints - 1)));
+      sampled.push(dates[index]);
+    }
+    return sampled;
+  }
+
+  return dates;
+}
+
+function getApiLookbackDaysForMode(mode) {
+  if (mode === "24h") return 1;
+  if (mode === "7d") return 30;
+  if (mode === "30d") return 60;
+  if (mode === "90d") return 120;
+  if (mode === "1y") return 120;
+  if (mode === "all") return 45;
+  return 60;
+}
+
+function getLocalOrLiveChartPrice(symbol, date) {
+  const cleanSymbol = normalizeCoinSymbol(symbol);
+  const day = dateOnly(date);
+
+  if (isSameLocalDate(day, todayLocalDate())) {
+    const live = getLivePriceForCoin(cleanSymbol);
+    if (live > 0) return live;
+  }
+
+  const local = getHistoricalPriceForCoin(cleanSymbol, day);
+  if (local > 0) return local;
+
+  return null;
+}
+
+async function fetchCoinGeckoMarketChart(symbol, days) {
+  const cleanSymbol = normalizeCoinSymbol(symbol);
+  const coin = COINS[cleanSymbol];
+
+  if (!coin || !coin.coinGeckoId) {
+    throw new Error("missing CoinGecko ID");
+  }
+
+  const url =
+    "https://api.coingecko.com/api/v3/coins/" +
+    encodeURIComponent(coin.coinGeckoId) +
+    "/market_chart?vs_currency=usd&days=" +
+    encodeURIComponent(days);
+
+  const data = await priceEngineFetchJson(url, "Chart CoinGecko " + cleanSymbol + " " + days + "d", 10000);
+  const points = normalizeMarketChartPrices(data);
+
+  if (!points.length) {
+    throw new Error("empty CoinGecko market_chart");
+  }
+
+  setApiStatus("chart", "Chart: " + cleanSymbol + " CoinGecko " + days + "d OK (" + points.length + " pts)", "apiStatusOk");
+  return points;
+}
+
+async function fetchCoinPaprikaHistorical(symbol, days, interval = "1d") {
+  const cleanSymbol = normalizeCoinSymbol(symbol);
+  const coin = COINS[cleanSymbol];
+
+  if (!coin || !coin.coinPaprikaId) {
+    throw new Error("missing CoinPaprika ID");
+  }
+
+  const end = new Date();
+  const start = new Date(end.getTime() - Number(days || 1) * 24 * 60 * 60 * 1000);
+  const startIso = start.toISOString().slice(0, 10);
+  const endIso = end.toISOString().slice(0, 10);
+
+  const url =
+    "https://api.coinpaprika.com/v1/tickers/" +
+    encodeURIComponent(coin.coinPaprikaId) +
+    "/historical?start=" +
+    encodeURIComponent(startIso) +
+    "&end=" +
+    encodeURIComponent(endIso) +
+    "&interval=" +
+    encodeURIComponent(interval);
+
+  const data = await priceEngineFetchJson(url, "Chart CoinPaprika " + cleanSymbol + " " + days + "d", 10000);
+
+  if (!Array.isArray(data)) {
+    throw new Error("empty CoinPaprika historical");
+  }
+
+  const points = data
+    .map(item => normalizeApiPoint(item && (item.timestamp || item.date), item && item.price))
+    .filter(Boolean)
+    .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+  if (!points.length) throw new Error("empty CoinPaprika historical");
+
+  setApiStatus("chart", "Chart: " + cleanSymbol + " CoinPaprika " + days + "d OK (" + points.length + " pts)", "apiStatusOk");
+  return points;
+}
+
+async function getDailyApiPriceMap(symbol, mode) {
+  const cleanSymbol = normalizeCoinSymbol(symbol);
+  const days = getApiLookbackDaysForMode(mode);
+  const cacheKey = cleanSymbol + ":" + days + "d";
+
+  if (priceEngineCache.daily[cacheKey]) return priceEngineCache.daily[cacheKey];
+
+  try {
+    const cgPoints = await fetchCoinGeckoMarketChart(cleanSymbol, days);
+    const buckets = bucketDailyApiPoints(cgPoints);
+    priceEngineCache.daily[cacheKey] = buckets;
+    return buckets;
+  } catch (err) {
+    setApiStatus("chart", "Chart: " + cleanSymbol + " CoinGecko gap failed (" + err.message + ")", "apiStatusWarn");
+  }
+
+  try {
+    const cpPoints = await fetchCoinPaprikaHistorical(cleanSymbol, days, "1d");
+    const buckets = bucketDailyApiPoints(cpPoints);
+    priceEngineCache.daily[cacheKey] = buckets;
+    return buckets;
+  } catch (err) {
+    setApiStatus("chart", "Chart: " + cleanSymbol + " CoinPaprika gap failed (" + err.message + ")", "apiStatusBad");
+  }
+
+  priceEngineCache.daily[cacheKey] = {};
+  return {};
+}
+
+async function getDailyPortfolioValueForDate(date, mode, apiMapsBySymbol = {}) {
+  const targetDate = dateOnly(date);
+  const timestamp = getChartPointTimestampForDate(targetDate);
+  const holdings = getCoinHoldingsAtTimestamp(timestamp);
+  const coins = Object.keys(holdings).filter(symbol => Number(holdings[symbol] || 0) > 0);
+
+  if (!coins.length) return null;
+
+  let total = 0;
+
+  for (const coin of coins) {
+    const amount = Number(holdings[coin] || 0);
+    let priceValue = getLocalOrLiveChartPrice(coin, targetDate);
+
+    if (!(priceValue > 0) && apiMapsBySymbol[coin]) {
+      priceValue = Number(apiMapsBySymbol[coin][dateKeyFromDate(targetDate)] || 0);
+    }
+
+    if (!(priceValue > 0)) {
+      return null;
+    }
+
+    total += amount * priceValue;
+  }
+
+  return total;
+}
+
+function trimLeadingInactiveChartPoints(points) {
+  const firstPositiveIndex = (points || []).findIndex(point => Number(point.value) > 0);
+  if (firstPositiveIndex < 0) return [];
+  return points.slice(firstPositiveIndex);
+}
+
+function makeUnavailableChartData(message, startDate, endDate) {
+  setApiStatus("chart", "Chart: " + message, "apiStatusBad");
+
+  return {
+    labels: ["", ""],
+    values: [null, null],
+    hoverLabels: [message, message],
+    startDate: startDate || new Date(),
+    endDate: endDate || new Date(),
+    empty: true,
+    unavailable: true,
+    hasGaps: true
+  };
+}
+
+async function buildDailyHistoricalChartData(mode) {
+  setApiStatus("chart", "Chart: building " + mode.toUpperCase() + " local-first", "apiStatusWarn");
+
+  if (!transactions || transactions.length === 0) {
+    return {
+      labels: ["", ""],
+      values: [0, 0],
+      hoverLabels: ["No transactions yet", "No transactions yet"],
+      startDate: new Date(),
+      endDate: new Date(),
+      empty: true,
+      noTransactions: true
+    };
+  }
+
+  const dates = buildDailyDateList(mode);
+  const symbolsNeedingApi = new Set();
+
+  for (const date of dates) {
+    const holdings = getCoinHoldingsAtTimestamp(getChartPointTimestampForDate(date));
+    Object.keys(holdings).forEach(symbol => {
+      if (!(getLocalOrLiveChartPrice(symbol, date) > 0)) symbolsNeedingApi.add(symbol);
+    });
+  }
+
+  const apiMapsBySymbol = {};
+  const symbols = Array.from(symbolsNeedingApi).filter(symbol => COINS[symbol]);
+
+  if (symbols.length) {
+    setApiStatus("chart", "Chart: " + mode.toUpperCase() + " gap-fill " + symbols.join(", "), "apiStatusWarn");
+    await Promise.all(symbols.map(async symbol => {
+      apiMapsBySymbol[symbol] = await getDailyApiPriceMap(symbol, mode);
+    }));
+  } else {
+    setApiStatus("chart", "Chart: " + mode.toUpperCase() + " using local/live only", "apiStatusOk");
+  }
+
+  const rawPoints = [];
+  let missing = 0;
+
+  for (const date of dates) {
+    const value = await getDailyPortfolioValueForDate(date, mode, apiMapsBySymbol);
+
+    if (!(Number(value) > 0)) missing++;
+
+    rawPoints.push({
+      date,
+      value: Number(value) > 0 ? Math.round(Number(value)) : null,
+      hoverLabel: date.toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+      })
+    });
+  }
+
+  const activePoints = trimLeadingInactiveChartPoints(rawPoints);
+  const points = activePoints.filter(point => Number(point.value) > 0);
+
+  if (!points.length) {
+    return makeUnavailableChartData(
+      mode.toUpperCase() + " unavailable: no valid local/API prices",
+      dates[0] || new Date(),
+      dates[dates.length - 1] || new Date()
+    );
+  }
+
+  const status = "Chart: " + mode.toUpperCase() + " rendered " + points.length + "/" + dates.length + " pts" + (missing ? " · missing " + missing : "");
+  setApiStatus("chart", status, missing ? "apiStatusWarn" : "apiStatusOk");
+
+  return {
+    labels: points.map(() => ""),
+    values: points.map(point => point.value),
+    hoverLabels: points.map(point => point.hoverLabel),
+    startDate: points[0]?.date || dates[0] || new Date(),
+    endDate: points[points.length - 1]?.date || dates[dates.length - 1] || new Date(),
+    hasGaps: missing > 0
+  };
+}
+
+async function getIntradayApiPoints(symbol) {
+  const cleanSymbol = normalizeCoinSymbol(symbol);
+  const cacheKey = cleanSymbol + ":24h";
+
+  if (priceEngineCache.intraday[cacheKey]) return priceEngineCache.intraday[cacheKey];
+
+  try {
+    const cgPoints = await fetchCoinGeckoMarketChart(cleanSymbol, 1);
+    priceEngineCache.intraday[cacheKey] = cgPoints;
+    return cgPoints;
+  } catch (err) {
+    setApiStatus("chart", "Chart: " + cleanSymbol + " 24H CoinGecko failed (" + err.message + ")", "apiStatusWarn");
+  }
+
+  try {
+    const cpPoints = await fetchCoinPaprikaHistorical(cleanSymbol, 2, "1h");
+    priceEngineCache.intraday[cacheKey] = cpPoints;
+    return cpPoints;
+  } catch (err) {
+    setApiStatus("chart", "Chart: " + cleanSymbol + " 24H CoinPaprika failed (" + err.message + ")", "apiStatusBad");
+  }
+
+  priceEngineCache.intraday[cacheKey] = [];
+  return [];
+}
+
+async function build24hChartData() {
+  setApiStatus("chart", "Chart: loading 24H API", "apiStatusWarn");
+
+  if (!transactions || transactions.length === 0) {
+    return {
+      labels: ["", ""],
+      values: [0, 0],
+      hoverLabels: ["No transactions yet", "No transactions yet"],
+      startDate: new Date(),
+      endDate: new Date(),
+      empty: true,
+      noTransactions: true
+    };
+  }
+
+  const now = new Date();
+  const start = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const currentHoldings = getCoinHoldingsAtTimestamp(now);
+  const symbols = Object.keys(currentHoldings).filter(symbol => Number(currentHoldings[symbol] || 0) > 0);
+
+  if (!symbols.length) {
+    return makeUnavailableChartData("24H unavailable: no positive holdings", start, now);
+  }
+
+  const intradayBySymbol = {};
+  await Promise.all(symbols.map(async symbol => {
+    intradayBySymbol[symbol] = await getIntradayApiPoints(symbol);
+  }));
+
+  const primary = symbols.find(symbol => Array.isArray(intradayBySymbol[symbol]) && intradayBySymbol[symbol].length > 1);
+
+  if (!primary) {
+    return makeUnavailableChartData("24H unavailable: all API providers failed/empty", start, now);
+  }
+
+  const basePoints = intradayBySymbol[primary]
+    .filter(point => point.date >= start && point.date <= now);
+  const rawPoints = [];
+
+  basePoints.forEach(point => {
+    const holdings = getCoinHoldingsAtTimestamp(point.date);
+    const coins = Object.keys(holdings).filter(symbol => Number(holdings[symbol] || 0) > 0);
+    let total = 0;
+    let valid = true;
+
+    for (const coin of coins) {
+      const priceValue = getNearestIntradayPrice(intradayBySymbol[coin], point.date);
+      if (!(priceValue > 0)) {
+        valid = false;
+        break;
+      }
+      total += Number(holdings[coin]) * priceValue;
+    }
+
+    rawPoints.push({
+      date: point.date,
+      value: valid && total > 0 ? Math.round(total) : null,
+      hoverLabel: point.date.toLocaleString(undefined, {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+      })
+    });
+  });
+
+  const points = trimLeadingInactiveChartPoints(rawPoints)
+    .filter(point => Number(point.value) > 0);
+
+  if (!points.length) {
+    return makeUnavailableChartData("24H unavailable: no valid API-valued points", start, now);
+  }
+
+  setApiStatus("chart", "Chart: 24H rendered " + points.length + " API pts", "apiStatusOk");
+
+  return {
+    labels: points.map(() => ""),
+    values: points.map(point => point.value),
+    hoverLabels: points.map(point => point.hoverLabel),
+    startDate: points[0]?.date || start,
+    endDate: points[points.length - 1]?.date || now,
+    hasGaps: false
+  };
+}
+
+async function buildChartDataset(mode) {
+  if (mode === "24h") return await build24hChartData();
+  return await buildDailyHistoricalChartData(mode);
+}
+
+function updateChartDateLabelsFromDataset(data, mode) {
+  const start = data?.startDate instanceof Date ? data.startDate : new Date();
+  const end = data?.endDate instanceof Date ? data.endDate : new Date();
+
+  const format = mode === "24h"
+    ? { month: "short", day: "numeric", hour: "numeric" }
+    : { month: "short", day: "numeric", year: "numeric" };
+
+  document.getElementById("chartStartLabel").textContent =
+    start.toLocaleDateString(undefined, format);
+
+  document.getElementById("chartEndLabel").textContent =
+    end.toLocaleDateString(undefined, format);
+}
+
+function getYAxisBounds(values, mode) {
+  const numericValues = (values || [])
+    .map(value => Number(value))
+    .filter(value => Number.isFinite(value));
+
+  if (numericValues.length === 0) {
+    return { min: 0, max: 1 };
+  }
+
+  const minValue = Math.min(...numericValues);
+  const maxValue = Math.max(...numericValues);
+  const range = maxValue - minValue;
+
+  if (range === 0) {
+    const pad = Math.max(Math.abs(maxValue) * 0.05, 1);
+    return {
+      min: Math.max(0, minValue - pad),
+      max: maxValue + pad
+    };
+  }
+
+  const paddingByMode = {
+    "24h": 0.25,
+    "7d": 0.20,
+    "30d": 0.18,
+    "90d": 0.16,
+    "1y": 0.14,
+    "all": 0.10
+  };
+
+  const padding = range * (paddingByMode[mode] || 0.12);
+
+  return {
+    min: Math.max(0, minValue - padding),
+    max: maxValue + padding
+  };
+}
+
+let chartRenderToken = 0;
+
+function restorePortfolioHeaderAfterChart() {
+  updatePortfolioHeader();
+}
+
+async function renderChart(mode) {
+  const token = ++chartRenderToken;
+  let data;
+
+  try {
+    data = await buildChartDataset(mode);
+  } catch (err) {
+    console.error("Chart render failed", err);
+    data = makeUnavailableChartData("Chart data unavailable", new Date(), new Date());
+  }
+
+  if (token !== chartRenderToken) return;
+
+  updateChartDateLabelsFromDataset(data, mode);
+  const isEmptyChart = data.empty === true;
+  const safeValues = Array.isArray(data.values) && data.values.length
+    ? data.values
+    : [null, null];
+  const safeLabels = Array.isArray(data.labels) && data.labels.length === safeValues.length
+    ? data.labels
+    : safeValues.map(() => "");
+  const safeHoverLabels = Array.isArray(data.hoverLabels) && data.hoverLabels.length === safeValues.length
+    ? data.hoverLabels
+    : safeValues.map(() => "");
+
+  if (valueChart) {
+    valueChart.destroy();
+  }
+
+  const bounds = getYAxisBounds(safeValues, mode);
+
+  valueChart = new Chart(document.getElementById("valueChart"), {
+  type: "line",
+  plugins: [hoverGuidePlugin],
+  data: {
+      labels: safeLabels,
+      datasets: [{
+        data: safeValues,
+        tension: 0.28,
+        pointRadius: 0,
+        pointHoverRadius: 0,
+        borderColor: getCssVar("--chartLine"),
+        backgroundColor: getCssVar("--chartFill"),
+        fill: !data.unavailable,
+        borderWidth: 3,
+        spanGaps: false
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: false,
+      hover: {
+        animationDuration: 0
+      },
+      responsiveAnimationDuration: 0,
+      interaction: {
+        mode: "index",
+        intersect: false,
+        axis: "x"
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false }
+      },
+     onHover: function(event) {
+     if (chartLocked || isEmptyChart) return;
+  const canvasPosition = Chart.helpers.getRelativePosition(event, valueChart);
+  const xScale = valueChart.scales.x;
+  const indexFloat = xScale.getValueForPixel(canvasPosition.x);
+
+  const dataValues = valueChart.data.datasets[0].data;
+  const leftIndex = Math.max(0, Math.floor(indexFloat));
+  const rightIndex = Math.min(dataValues.length - 1, leftIndex + 1);
+
+  const leftValue = Number(dataValues[leftIndex]);
+  const rightValue = Number(dataValues[rightIndex]);
+  const percent = indexFloat - leftIndex;
+
+  let interpolatedValue = null;
+
+  if (Number.isFinite(leftValue) && Number.isFinite(rightValue)) {
+    interpolatedValue = leftValue + (rightValue - leftValue) * percent;
+  } else if (Number.isFinite(leftValue)) {
+    interpolatedValue = leftValue;
+  } else if (Number.isFinite(rightValue)) {
+    interpolatedValue = rightValue;
+  }
+
+  if (!Number.isFinite(Number(interpolatedValue))) return;
+
+  document.getElementById("portfolioValue").textContent = money(interpolatedValue);
+
+const dayChangeEl = document.getElementById("dayChange");
+dayChangeEl.style.visibility = "visible";
+dayChangeEl.textContent = safeHoverLabels[leftIndex] || "";
+dayChangeEl.className = "dayChange";
+
+if (document.body.dataset.theme === "red") {
+  dayChangeEl.style.color = "#ff4040";
+} else {
+  dayChangeEl.style.color = "#8f96aa";
+}
+  },
+      scales: {
+        x: {
+  ticks: {
+    display: true,
+    color: getCssVar("--muted"),
+    maxTicksLimit: 6
+  },
+  grid: { display: false }
+},
+        y: {
+  min: bounds.min,
+  max: bounds.max,
+  ticks: {
+  color: getCssVar("--muted"),
+  count: 5,
+  callback: value => "$" + Math.round(value / 1000) + "K"
+},
+  grid: { color: getCssVar("--softBorder") }
+}
+      }
+    }
+  });
+
+  const canvas = document.getElementById("valueChart");
+
+canvas.onmouseleave = function() {
+  restorePortfolioHeaderAfterChart();
+
+  if (isEmptyChart) {
+    const dayChangeEl = document.getElementById("dayChange");
+    dayChangeEl.textContent = data.unavailable ? "Chart data unavailable" : "No transactions yet";
+    dayChangeEl.className = "dayChange";
+    dayChangeEl.style.color = "var(--muted)";
+  }
+};
+
+  if (isEmptyChart) {
+    restorePortfolioHeaderAfterChart();
+    const dayChangeEl = document.getElementById("dayChange");
+    dayChangeEl.textContent = data.unavailable ? "Chart data unavailable" : "No transactions yet";
+    dayChangeEl.className = "dayChange";
+    dayChangeEl.style.color = "var(--muted)";
+  }
+}
+
+function requestChartRender(mode) {
+  return renderChart(mode).catch(err => {
+    console.error("Chart request failed", err);
+  });
+}
+
+document.querySelectorAll(".chartMode").forEach(button => {
+  button.addEventListener("click", async function() {
+    document.querySelectorAll(".chartMode").forEach(b => b.classList.remove("active"));
+    this.classList.add("active");
+
+    const mode = this.dataset.mode;
+    await requestChartRender(mode);
+  });
+});
+
+let currentTxTypeFilter = "all";
+
+let currentSearch = "";
+
+function normalizeSearchText(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replaceAll(",", "")
+    .replaceAll("$", "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getFilteredTransactions() {
+  let filtered = transactions;
+
+  if (currentTxTypeFilter === "buy") {
+    filtered = filtered.filter(t => t.type === "Buy");
+  }
+
+  if (currentTxTypeFilter === "sell") {
+    filtered = filtered.filter(t => t.type === "Sell");
+  }
+
+  if (currentSearch.trim() !== "") {
+    const rawSearch = currentSearch.trim();
+    const q = normalizeSearchText(rawSearch);
+    const qSymbol = normalizeCoinSymbol(rawSearch);
+    const supportedCoinSymbols = getSupportedCoins();
+
+    filtered = filtered.filter(t => {
+      const coin = String(t.coin || "KAS").toUpperCase();
+
+      if (supportedCoinSymbols.includes(qSymbol)) {
+        return coin === qSymbol;
+      }
+
+      const timestampDate = getTxTimestampDate(t) || t.date;
+      const monthShort = timestampDate.toLocaleDateString(undefined, { month: "short" });
+      const monthLong = timestampDate.toLocaleDateString(undefined, { month: "long" });
+      const day = timestampDate.getDate().toString();
+      const year = timestampDate.getFullYear().toString();
+      const timeText = timestampDate.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+
+      const dateFormats = [
+        timestampDate.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }),
+        timestampDate.toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" }),
+        timeText,
+        `${monthShort} ${day} ${year}`,
+        `${monthLong} ${day} ${year}`,
+        `${year}-${String(timestampDate.getMonth() + 1).padStart(2, "0")}-${String(timestampDate.getDate()).padStart(2, "0")}`,
+        `${timestampDate.getMonth() + 1}/${day}/${year}`,
+        `${monthShort} ${year}`,
+        `${monthLong} ${year}`,
+        year
+      ];
+
+      const fullText = [
+        ...dateFormats,
+        coin,
+        t.type,
+        Math.round(t.amount).toString(),
+        t.amount.toLocaleString(),
+        Number(t.price || 0).toFixed(5),
+        money(t.total),
+        t.notes || ""
+      ].map(normalizeSearchText).join(" ");
+
+      return fullText.includes(q);
+    });
+  }
+
+  return filtered
+    .slice()
+    .sort((a, b) => {
+      const timeDiff = getTxTimestampMs(b) - getTxTimestampMs(a);
+      if (Number.isFinite(timeDiff) && timeDiff !== 0) return timeDiff;
+      return Number(b.id || 0) - Number(a.id || 0);
+    });
+}
+
+let currentPage = 1;
+const rowsPerPage = 10;
+
+function renderPagination(totalRows) {
+  const totalPages = Math.ceil(totalRows / rowsPerPage);
+  const pagination = document.getElementById("pagination");
+
+  let html = "";
+
+  const pageGroupStart = Math.floor((currentPage - 1) / 10) * 10 + 1;
+  const pageGroupEnd = Math.min(pageGroupStart + 9, totalPages);
+
+  html += `<div class="page" data-page="prev">Prev</div>`;
+
+  for (let i = pageGroupStart; i <= pageGroupEnd; i++) {
+    html += `<div class="page ${i === currentPage ? "active" : ""}" data-page="${i}">${i}</div>`;
+  }
+
+  html += `<div class="page" data-page="next">Next</div>`;
+
+  pagination.innerHTML = html;
+}
+
+function renderTransactionTables() {
+  const filtered = getFilteredTransactions();
+
+  const start = (currentPage - 1) * rowsPerPage;
+  const end = start + rowsPerPage;
+
+  document.getElementById("allRows").innerHTML =
+  filtered.length === 0
+    ? `
+      <tr>
+        <td colspan="5" style="text-align:center; padding:34px; color:var(--muted); font-weight:800;">
+          No transactions found
+        </td>
+      </tr>
+    `
+    : filtered.slice(start, end).map(t => rowHtml(t)).join("");
+
+  renderPagination(filtered.length);
+}
+
+document.querySelectorAll(".txTypeFilter").forEach(button => {
+  button.addEventListener("click", function() {
+    document.querySelectorAll(".txTypeFilter").forEach(b => b.classList.remove("active"));
+    this.classList.add("active");
+
+    currentTxTypeFilter = this.dataset.type;
+    renderTransactionTables();
+
+
+
+  });
+});
+
+document.querySelectorAll(".page").forEach(button => {
+  button.addEventListener("click", function() {
+
+    document.querySelectorAll(".page").forEach(b =>
+      b.classList.remove("active")
+    );
+
+    this.classList.add("active");
+
+    currentPage = Number(this.textContent);
+
+    renderTransactionTables();
+
+  });
+});
+
+document.getElementById("pagination").addEventListener("click", function(e) {
+  if (!e.target.classList.contains("page")) return;
+
+  const filtered = getFilteredTransactions();
+  const totalPages = Math.ceil(filtered.length / rowsPerPage);
+  const page = e.target.dataset.page;
+
+  if (page === "prev") {
+    currentPage = Math.max(1, currentPage - 1);
+  } else if (page === "next") {
+    currentPage = Math.min(totalPages, currentPage + 1);
+  } else {
+    currentPage = Number(page);
+  }
+
+  renderTransactionTables();
+});
+
+document.querySelector(".searchBar").addEventListener("input", function() {
+  currentSearch = this.value;
+  currentPage = 1;
+  renderTransactionTables();
+});
+
+document.addEventListener("click", function(e) {
+  const row = e.target.closest(".txRow");
+  if (!row) return;
+
+  editingTxId = Number(row.dataset.id);
+const tx = transactions.find(t => t.id === editingTxId);
+if (!tx) return;
+modalMode = "edit";
+document.getElementById("txModalTitle").textContent = "Edit Transaction";
+document.getElementById("saveTx").textContent = "Save";
+document.getElementById("deleteTx").style.display = "";
+
+  const txTimestampDate = getTxTimestampDate(tx);
+
+  if (!txTimestampDate) {
+    showAppAlert("Missing Timestamp", "This transaction does not have a valid timestamp and cannot be edited.");
+    return;
+  }
+
+  document.getElementById("editDate").value = formatDateInput(txTimestampDate);
+  document.getElementById("editTime").value = formatTimeInput(txTimestampDate);
+  document.getElementById("editType").value = tx.type;
+  populateCoinDropdown(tx.coin || "KAS");
+  document.getElementById("editAmount").value = tx.amount;
+  document.getElementById("editPrice").value = tx.price.toFixed(5);
+  document.getElementById("editNotes").value = tx.notes || "";
+
+  setActiveTransactionTypeButton(tx.type);
+
+  document.getElementById("editModal").style.display = "flex";
+
+setTimeout(() => {
+  editDatePicker.setDate(document.getElementById("editDate").value, false);
+  editDatePicker.redraw();
+}, 50);
+});
+
+function setActiveTransactionTypeButton(type) {
+  const txType = String(type || "Buy");
+  document.querySelectorAll(".editTypeBtn").forEach(b => {
+    b.classList.toggle("active", b.dataset.type === txType);
+  });
+
+  if (!document.querySelector(`.editTypeBtn.active`)) {
+    const buyButton = document.getElementById("editBuy");
+    if (buyButton) buyButton.classList.add("active");
+    document.getElementById("editType").value = "Buy";
+    return;
+  }
+
+  document.getElementById("editType").value = txType;
+}
+
+document.querySelectorAll(".editTypeBtn").forEach(button => {
+  button.addEventListener("click", function() {
+    setActiveTransactionTypeButton(this.dataset.type);
+  });
+});
+
+document.getElementById("cancelTx").addEventListener("click", function() {
+  document.getElementById("editModal").style.display = "none";
+});
+
+
+let notesEditorOriginalValue = "";
+
+function openNotesEditor() {
+  const notesInput = document.getElementById("editNotes");
+  const notesTextarea = document.getElementById("notesEditorTextarea");
+  const notesModal = document.getElementById("notesEditorModal");
+
+  if (!notesInput || !notesTextarea || !notesModal) return;
+
+  notesEditorOriginalValue = notesInput.value || "";
+  notesTextarea.value = notesEditorOriginalValue;
+  notesModal.style.display = "flex";
+
+  setTimeout(() => {
+    notesTextarea.focus();
+    notesTextarea.selectionStart = notesTextarea.value.length;
+    notesTextarea.selectionEnd = notesTextarea.value.length;
+  }, 50);
+}
+
+function closeNotesEditor() {
+  const notesModal = document.getElementById("notesEditorModal");
+  if (notesModal) notesModal.style.display = "none";
+}
+
+const editNotesInput = document.getElementById("editNotes");
+if (editNotesInput) {
+  editNotesInput.addEventListener("click", openNotesEditor);
+}
+
+const saveNotesEditorButton = document.getElementById("saveNotesEditor");
+if (saveNotesEditorButton) {
+  saveNotesEditorButton.addEventListener("click", function() {
+    const notesInput = document.getElementById("editNotes");
+    const notesTextarea = document.getElementById("notesEditorTextarea");
+
+    if (notesInput && notesTextarea) {
+      notesInput.value = notesTextarea.value;
+    }
+
+    closeNotesEditor();
+  });
+}
+
+const cancelNotesEditorButton = document.getElementById("cancelNotesEditor");
+if (cancelNotesEditorButton) {
+  cancelNotesEditorButton.addEventListener("click", function() {
+    const notesTextarea = document.getElementById("notesEditorTextarea");
+    if (notesTextarea) notesTextarea.value = notesEditorOriginalValue;
+    closeNotesEditor();
+  });
+}
+
+let editDatePicker = flatpickr("#editDate", {
+  dateFormat: "Y-m-d",
+  allowInput: false,
+  clickOpens: true,
+  monthSelectorType: "dropdown",
+  defaultDate: "today",
+  maxDate: "today",
+  onChange: function(selectedDates) {
+    if (selectedDates.length > 0) {
+      setTxPriceFromSelectedDate(selectedDates[0]);
+    }
+  }
+});
+
+document.getElementById("editDate").addEventListener("click", function() {
+  editDatePicker.open();
+});
+
+document.getElementById("editCoin").addEventListener("change", function() {
+  const dateValue = document.getElementById("editDate").value;
+  if (!dateValue) return;
+
+  setTxPriceFromSelectedDate(localDateFromInput(dateValue));
+});
+
+let modalMode = "edit";
+
+document.getElementById("addTx").addEventListener("click", function() {
+  modalMode = "add";
+  editingTxId = null;
+
+  document.getElementById("txModalTitle").textContent = "Add Transaction";
+  document.getElementById("saveTx").textContent = "Add Transaction";
+
+  const today = new Date();
+  document.getElementById("editDate").value = formatDateInput(today);
+  document.getElementById("editTime").value = formatTimeInput(today);
+
+document.getElementById("editType").value = "Buy";
+populateCoinDropdown("KAS");
+document.getElementById("editAmount").value = "";
+document.getElementById("editPrice").value = "";
+document.getElementById("editNotes").value = "";
+
+  setActiveTransactionTypeButton("Buy");
+
+  document.getElementById("deleteTx").style.display = "none";
+  document.getElementById("editModal").style.display = "flex";
+
+setTimeout(() => {
+  const selectedDate = localDateFromInput(document.getElementById("editDate").value);
+
+  editDatePicker.setDate(selectedDate, false);
+  editDatePicker.redraw();
+
+  setTxPriceFromSelectedDate(selectedDate);
+}, 50);
+});
+
+function getCoinHoldingsBeforeTx(coin, excludeTxId = null) {
+  const symbol = String(coin || "KAS").toUpperCase();
+  let balance = 0;
+
+  transactions
+    .slice()
+    .reverse()
+    .forEach(t => {
+      if (excludeTxId !== null && t.id === excludeTxId) return;
+      if (String(t.coin || "KAS").toUpperCase() !== symbol) return;
+
+      const amount = Number(t.amount || 0);
+
+      if (t.type === "Buy" || t.type === "Transfer In") {
+        balance += amount;
+      }
+
+      else if (t.type === "Sell" || t.type === "Transfer Out") {
+        balance -= Math.min(amount, Math.max(0, balance));
+      }
+
+      if (balance < 0) balance = 0;
+    });
+
+  return Math.max(0, balance);
+}
+
+function wouldMakeCoinNegative(coin, type, amount, excludeTxId = null) {
+  const symbol = String(coin || "KAS").toUpperCase();
+  const txAmount = Number(amount || 0);
+
+  if (type !== "Sell" && type !== "Transfer Out") {
+    return false;
+  }
+
+  const available = getCoinHoldingsBeforeTx(symbol, null);
+
+  if (excludeTxId !== null) {
+    const existingTx = transactions.find(t => t.id === excludeTxId);
+
+    if (
+      existingTx &&
+      String(existingTx.coin || "KAS").toUpperCase() === symbol &&
+      (existingTx.type === "Buy" || existingTx.type === "Transfer In")
+    ) {
+      return txAmount > available + 0.0000000001;
+    }
+  }
+
+  const availableExcludingCurrent = getCoinHoldingsBeforeTx(symbol, excludeTxId);
+
+  return txAmount > availableExcludingCurrent + 0.0000000001;
+}
+
+function showNotEnoughCoinAlert(coin, available) {
+  const symbol = String(coin || "KAS").toUpperCase();
+
+  showAppAlert(
+    "Not Enough " + symbol,
+    "You only have " + formatCoinAmount(available, symbol) + " " + symbol + " available."
+  );
+}
+
+document.getElementById("saveTx").addEventListener("click", function() {
+  const timestampDate = createLocalTimestampFromInputs(
+    document.getElementById("editDate").value,
+    document.getElementById("editTime").value
+  );
+  const date = timestampDate ? dateOnly(timestampDate) : null;
+  const timestamp = timestampDate ? timestampDate.toISOString() : "";
+  const type = document.getElementById("editType").value;
+  const coin = document.getElementById("editCoin").value;
+  const amount = Number(document.getElementById("editAmount").value);
+  const txPrice = Number(document.getElementById("editPrice").value);
+  const notes = document.getElementById("editNotes").value;
+
+const excludeTxId = editingTxId !== null ? editingTxId : null;
+
+if (wouldMakeCoinNegative(coin, type, amount, excludeTxId)) {
+  const existingTx = excludeTxId !== null
+    ? transactions.find(t => t.id === excludeTxId)
+    : null;
+
+  const available =
+    existingTx &&
+    String(existingTx.coin || "KAS").toUpperCase() === String(coin || "KAS").toUpperCase() &&
+    (existingTx.type === "Buy" || existingTx.type === "Transfer In")
+      ? getCoinHoldingsBeforeTx(coin, null)
+      : getCoinHoldingsBeforeTx(coin, excludeTxId);
+
+  showNotEnoughCoinAlert(coin, available);
+  return;
+}
+
+  if (!timestampDate || !date || !amount || !txPrice) {
+    showAppAlert("Missing Transaction Info", "Date, time, amount, and price are required.");
+    return;
+  }
+if (dateOnly(date) > todayLocalDate()) {
+ showAppAlert("Invalid Date", "Future dates are not allowed.");
+  return;
+}
+
+  if (modalMode === "add") {
+    transactions.push({
+  id: transactionIdCounter++,
+  timestamp,
+  date,
+  coin,
+  type,
+  amount,
+  price: txPrice,
+  total: amount * txPrice,
+  notes
+});
+
+  } else {
+    if (editingTxId === null) return;
+
+    const tx = transactions.find(t => t.id === editingTxId);
+    if (!tx) return;
+if (tx.type !== type) {
+  pendingTypeChange = {
+    tx,
+    timestamp,
+    date,
+    coin,
+    type,
+    amount,
+    txPrice,
+    notes
+  };
+
+  document.getElementById("typeChangeText").textContent =
+    `Change transaction type from ${tx.type} to ${type}?`;
+
+  document.getElementById("typeChangeConfirmModal").style.display = "flex";
+  return;
+}
+
+  tx.timestamp = timestamp;
+  tx.date = date;
+  tx.coin = coin;
+  tx.type = type;
+  tx.amount = amount;
+  tx.price = txPrice;
+  tx.total = amount * txPrice;
+  tx.notes = notes;
+
+  }
+
+  sortTransactionsNewestFirst();
+  saveTransactions();
+  recalculatePortfolioState();
+  updatePortfolioHeader();
+  renderHoldings();
+
+  document.getElementById("deleteTx").style.display = "";
+  document.getElementById("editModal").style.display = "none";
+
+  currentPage = 1;
+  renderTransactionTables();
+
+  const activeMode = document.querySelector(".chartMode.active")?.dataset.mode || "all";
+  requestChartRender(activeMode);
+});
+
+document.getElementById("deleteTx").addEventListener("click", function() {
+  if (editingTxId === null) return;
+  document.getElementById("deleteConfirmModal").style.display = "flex";
+});
+
+
+document.getElementById("cancelTypeChange").addEventListener("click", function() {
+  pendingTypeChange = null;
+  document.getElementById("typeChangeConfirmModal").style.display = "none";
+});
+
+document.getElementById("confirmTypeChange").addEventListener("click", function() {
+  if (!pendingTypeChange) return;
+
+  const { tx, timestamp, date, coin, type, amount, txPrice, notes } = pendingTypeChange;
+
+  tx.timestamp = timestamp;
+  tx.date = date;
+  tx.coin = coin;
+  tx.type = type;
+  tx.amount = amount;
+  tx.price = txPrice;
+  tx.total = amount * txPrice;
+  tx.notes = notes;
+
+  pendingTypeChange = null;
+
+  sortTransactionsNewestFirst();
+  saveTransactions();
+  recalculatePortfolioState();
+  updatePortfolioHeader();
+  renderHoldings();
+
+  document.getElementById("typeChangeConfirmModal").style.display = "none";
+  document.getElementById("deleteTx").style.display = "";
+  document.getElementById("editModal").style.display = "none";
+
+  currentPage = 1;
+  renderTransactionTables();
+
+  const activeMode = document.querySelector(".chartMode.active")?.dataset.mode || "all";
+  requestChartRender(activeMode);
+});
+document.getElementById("cancelDeleteTx").addEventListener("click", function() {
+  document.getElementById("deleteConfirmModal").style.display = "none";
+});
+
+document.getElementById("confirmDeleteTx").addEventListener("click", function() {
+  if (editingTxId === null) return;
+
+  transactions = transactions.filter(t => t.id !== editingTxId);
+
+  editingTxId = null;
+
+  sortTransactionsNewestFirst();
+  saveTransactions();
+  recalculatePortfolioState();
+  updatePortfolioHeader();
+  renderHoldings();
+
+  document.getElementById("deleteConfirmModal").style.display = "none";
+  document.getElementById("editModal").style.display = "none";
+
+  currentPage = 1;
+  renderTransactionTables();
+
+  const activeMode = document.querySelector(".chartMode.active")?.dataset.mode || "all";
+  requestChartRender(activeMode);
+});
+
+let appPopupConfirmAction = null;
+
+function showAppAlert(title, message) {
+  appPopupConfirmAction = null;
+
+  document.getElementById("appPopupTitle").textContent = title;
+  document.getElementById("appPopupMessage").textContent = message;
+  document.getElementById("appPopupCancel").style.display = "none";
+  document.getElementById("appPopupModal").style.display = "flex";
+}
+
+function showAppConfirm(title, message, onConfirm) {
+  appPopupConfirmAction = onConfirm;
+
+  document.getElementById("appPopupTitle").textContent = title;
+  document.getElementById("appPopupMessage").textContent = message;
+  document.getElementById("appPopupCancel").style.display = "";
+  document.getElementById("appPopupModal").style.display = "flex";
+}
+
+document.getElementById("appPopupConfirm").addEventListener("click", function() {
+  document.getElementById("appPopupModal").style.display = "none";
+
+  if (appPopupConfirmAction) {
+    const action = appPopupConfirmAction;
+    appPopupConfirmAction = null;
+    action();
+  }
+});
+
+document.getElementById("appPopupCancel").addEventListener("click", function() {
+  appPopupConfirmAction = null;
+  document.getElementById("appPopupModal").style.display = "none";
+});
+
+function parseCsvLine(line, delimiter = null) {
+  const result = [];
+  let current = "";
+  let inQuotes = false;
+  const activeDelimiter = delimiter || detectCsvDelimiter(line);
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+
+    if (char === '"' && line[i + 1] === '"') {
+      current += '"';
+      i++;
+    } else if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === activeDelimiter && !inQuotes) {
+      result.push(current.trim());
+      current = "";
+    } else {
+      current += char;
+    }
+  }
+
+  result.push(current.trim());
+  return result;
+}
+
+function normalizeCsvType(type) {
+  const t = String(type || "").toLowerCase();
+
+  if (t === "buy") return "Buy";
+  if (t === "sell") return "Sell";
+  if (t === "transferin" || t === "transfer in") return "Transfer In";
+  if (t === "transferout" || t === "transfer out") return "Transfer Out";
+
+  return "";
+}
+
+
+function parseCsvDateHeaderOffset(header) {
+  const text = String(header || "");
+  const match = text.match(/UTC\s*([+-])\s*(\d{1,2})(?::?(\d{2}))?/i);
+
+  if (!match) {
+    return null;
+  }
+
+  const sign = match[1] === "-" ? -1 : 1;
+  const hours = Number(match[2] || 0);
+  const minutes = Number(match[3] || 0);
+
+  return sign * ((hours * 60) + minutes);
+}
+
+function parseTransactionCsvTimestamp(rawValue, timezoneOffsetMinutes) {
+  const raw = String(rawValue || "").trim();
+
+  if (!raw) {
+    return null;
+  }
+
+  const isoParsed = new Date(raw);
+  if (raw.includes("T") && !isNaN(isoParsed.getTime())) {
+    return isoParsed;
+  }
+
+  const match = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)$/);
+
+  if (!match) {
+    return null;
+  }
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const hours = Number(match[4]);
+  const minutes = Number(match[5]);
+  const seconds = Number(match[6] || 0);
+
+  if (
+    !Number.isFinite(year) ||
+    !Number.isFinite(month) ||
+    !Number.isFinite(day) ||
+    !Number.isFinite(hours) ||
+    !Number.isFinite(minutes) ||
+    !Number.isFinite(seconds)
+  ) {
+    return null;
+  }
+
+  if (timezoneOffsetMinutes === null || timezoneOffsetMinutes === undefined) {
+    return new Date(year, month - 1, day, hours, minutes, seconds, 0);
+  }
+
+  const utcMs =
+    Date.UTC(year, month - 1, day, hours, minutes, seconds, 0) -
+    (timezoneOffsetMinutes * 60 * 1000);
+
+  return new Date(utcMs);
+}
+
+async function importCsvText(csvText) {
+  const lines = String(csvText || "")
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(Boolean);
+
+  const headerIndex = lines.findIndex(line =>
+    line.includes("Date") &&
+    (line.includes("Token") || line.includes("Coin")) &&
+    line.includes("Type")
+  );
+
+  if (headerIndex === -1) {
+    showAppAlert("CSV Error", "CSV headers were not found.");
+    return;
+  }
+
+  const delimiter = detectCsvDelimiter(lines[headerIndex]);
+  const headers = parseCsvLine(lines[headerIndex], delimiter).map(h => String(h || "").trim());
+
+  const dateIndex = headers.findIndex(h => h.toLowerCase().startsWith("date"));
+  const coinIndex = headers.findIndex(h => h.toLowerCase() === "token" || h.toLowerCase() === "coin");
+  const typeIndex = headers.findIndex(h => h.toLowerCase() === "type");
+  const priceIndex = headers.findIndex(h => h.toLowerCase() === "price (usd)" || h.toLowerCase() === "price");
+  const amountIndex = headers.findIndex(h => h.toLowerCase() === "amount");
+  const totalIndex = headers.findIndex(h => h.toLowerCase() === "total value (usd)" || h.toLowerCase() === "total");
+  const notesIndex = headers.findIndex(h => h.toLowerCase() === "notes");
+  const csvTimezoneOffsetMinutes = dateIndex >= 0
+    ? parseCsvDateHeaderOffset(headers[dateIndex])
+    : null;
+
+  if (dateIndex < 0 || coinIndex < 0 || typeIndex < 0 || amountIndex < 0) {
+    showAppAlert(
+      "CSV Error",
+      "CSV is missing required columns: Date, Token/Coin, Type, and Amount."
+    );
+    return;
+  }
+
+  let imported = 0;
+  let skipped = 0;
+
+  const skipReasons = {};
+  const importedTypes = {};
+  const skippedCoins = {};
+  const audit = {};
+
+  function skip(reason) {
+    skipped++;
+    skipReasons[reason] = (skipReasons[reason] || 0) + 1;
+  }
+
+  function parseCsvNumber(value) {
+    return Number(
+      String(value || "")
+        .replaceAll("$", "")
+        .replaceAll(",", "")
+        .trim()
+    );
+  }
+
+  function parseCsvDateTime(rawValue) {
+    const timestampDate = parseTransactionCsvTimestamp(rawValue, csvTimezoneOffsetMinutes);
+
+    if (!timestampDate || isNaN(timestampDate.getTime())) {
+      return {
+        timestampDate: null,
+        date: null,
+        sortTime: NaN
+      };
+    }
+
+    return {
+      timestampDate,
+      timestamp: timestampDate.toISOString(),
+      date: dateOnly(timestampDate),
+      sortTime: timestampDate.getTime()
+    };
+  }
+
+  function ensureAuditCoin(coin) {
+    if (!audit[coin]) {
+      audit[coin] = {
+        buys: 0,
+        sells: 0,
+        transferIn: 0,
+        transferOut: 0,
+        net: 0
+      };
+    }
+
+    return audit[coin];
+  }
+
+  const parsedRows = [];
+
+  for (let i = headerIndex + 1; i < lines.length; i++) {
+    const row = parseCsvLine(lines[i], delimiter);
+
+    const parsedDate = parseCsvDateTime(row[dateIndex]);
+    const date = parsedDate.date;
+    const coin = normalizeCoinSymbol(row[coinIndex]);
+    const type = normalizeCsvType(row[typeIndex]);
+
+    if (!coin) {
+      skippedCoins["(blank)"] = (skippedCoins["(blank)"] || 0) + 1;
+      skip("Blank coin");
+      continue;
+    }
+
+    if (!(await ensureCoinExistsForImport(coin))) {
+  skippedCoins[coin || "(blank)"] =
+    (skippedCoins[coin || "(blank)"] || 0) + 1;
+
+  skip("Invalid coin");
+  continue;
+}
+
+    if (!type) {
+      skip("Unknown type");
+      continue;
+    }
+
+    const amount = parseCsvNumber(row[amountIndex]);
+    const txPrice = priceIndex >= 0 ? parseCsvNumber(row[priceIndex]) : 0;
+    const total = totalIndex >= 0 ? parseCsvNumber(row[totalIndex]) : 0;
+    const notes = notesIndex >= 0 ? row[notesIndex] || "" : "";
+
+    if (!date || !amount || amount <= 0) {
+      skip("Missing timestamp/date or amount");
+      continue;
+    }
+
+    const historicalPrice = getHistoricalPriceForCoin(coin, date);
+
+    const finalPrice =
+      Number(txPrice) > 0
+        ? Number(txPrice)
+        : historicalPrice;
+
+    const finalTotal =
+      Number(total) > 0
+        ? Number(total)
+        : finalPrice > 0
+          ? amount * finalPrice
+          : 0;
+
+    parsedRows.push({
+      timestamp: parsedDate.timestamp,
+      date,
+      sortTime: parsedDate.sortTime,
+      originalIndex: i,
+      coin,
+      type,
+      amount,
+      price: finalPrice,
+      total: finalTotal,
+      notes
+    });
+  }
+
+  parsedRows.sort((a, b) => {
+    if (a.sortTime !== b.sortTime) return a.sortTime - b.sortTime;
+    return a.originalIndex - b.originalIndex;
+  });
+
+  const importedTransactions = [];
+
+  parsedRows.forEach(row => {
+    const a = ensureAuditCoin(row.coin);
+
+    if (row.type === "Buy") {
+      a.buys += row.amount;
+      a.net += row.amount;
+    }
+
+    else if (row.type === "Sell") {
+      a.sells += row.amount;
+      a.net -= row.amount;
+    }
+
+    else if (row.type === "Transfer In") {
+      a.transferIn += row.amount;
+      a.net += row.amount;
+    }
+
+    else if (row.type === "Transfer Out") {
+      a.transferOut += row.amount;
+      a.net -= row.amount;
+    }
+
+    importedTransactions.push({
+      id: importedTransactions.length + 1,
+      timestamp: row.timestamp,
+      date: row.date,
+      coin: row.coin,
+      type: row.type,
+      amount: row.amount,
+      price: row.price,
+      total: row.total,
+      notes: row.notes
+    });
+
+    importedTypes[row.type] = (importedTypes[row.type] || 0) + 1;
+    imported++;
+  });
+
+ Object.keys(audit).forEach(coin => {
+  const rawNet = Number(audit[coin].net || 0);
+
+  audit[coin].rawNet = rawNet;
+
+  if (Math.abs(rawNet) < 0.0001) {
+    audit[coin].net = 0;
+    audit[coin].dust = rawNet;
+  } else {
+    audit[coin].net = rawNet;
+    audit[coin].dust = 0;
+  }
+});
+
+  transactions = importedTransactions;
+
+  transactionIdCounter =
+    transactions.length > 0
+      ? Math.max(...transactions.map(t => t.id)) + 1
+      : 1;
+
+  sortTransactionsNewestFirst();
+  saveTransactions();
+  recalculatePortfolioState();
+  updatePortfolioHeader();
+  renderHoldings();
+
+  currentPage = 1;
+  renderTransactionTables();
+
+  const activeMode = document.querySelector(".chartMode.active")?.dataset.mode || "all";
+  requestChartRender(activeMode);
+
+  updateSettingsPanel();
+
+  Object.keys(audit).forEach(coin => {
+  const rawNet = Number(audit[coin].net || 0);
+
+  audit[coin].rawNet = rawNet;
+
+  if (Math.abs(rawNet) < 0.0001) {
+    audit[coin].net = 0;
+    audit[coin].dust = rawNet;
+  } else {
+    audit[coin].net = rawNet;
+    audit[coin].dust = 0;
+  }
+});
+
+const auditText =
+  Object.keys(audit).length > 0
+    ? Object.entries(audit)
+        .map(([coin, a]) => {
+          const dustText =
+            a.dust && Math.abs(a.dust) > 0
+              ? " (dust: " + formatCoinAmount(a.dust, coin) + ")"
+              : "";
+
+          return (
+            coin +
+            ": net " + formatCoinAmount(a.net, coin) +
+            dustText +
+            " | buys " + formatCoinAmount(a.buys, coin) +
+            " | sells " + formatCoinAmount(a.sells, coin) +
+            " | in " + formatCoinAmount(a.transferIn, coin) +
+            " | out " + formatCoinAmount(a.transferOut, coin)
+          );
+        })
+        .join("\n")
+    : "None";
+
+  const skippedReasonsText =
+    Object.keys(skipReasons).length > 0
+      ? Object.entries(skipReasons)
+          .map(([reason, count]) => reason + ": " + count)
+          .join("\n")
+      : "None";
+
+  const skippedCoinsText =
+    Object.keys(skippedCoins).length > 0
+      ? Object.entries(skippedCoins)
+          .map(([coin, count]) => coin + ": " + count)
+          .join("\n")
+      : "None";
+
+  const importedTypesText =
+    Object.keys(importedTypes).length > 0
+      ? Object.entries(importedTypes)
+          .map(([type, count]) => type + ": " + count)
+          .join("\n")
+      : "None";
+
+  showAppAlert(
+    "Import Complete",
+    "Imported: " + imported + "\n" +
+    "Skipped: " + skipped + "\n\n" +
+    "Mode: Replaced current transactions\n\n" +
+    "Coin audit:\n" +
+    auditText +
+    "\n\nSkipped reasons:\n" +
+    skippedReasonsText +
+    "\n\nSkipped coins:\n" +
+    skippedCoinsText +
+    "\n\nImported types:\n" +
+    importedTypesText
+  );
+}
+
+document.getElementById("importCsvTx").addEventListener("click", function() {
+  document.getElementById("csvFileInput").click();
+});
+
+document.getElementById("csvFileInput").addEventListener("change", function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = async function(event) {
+    await importCsvText(event.target.result);
+    e.target.value = "";
+  };
+
+  reader.readAsText(file);
+});
+
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.addEventListener("click", function() {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    this.classList.add("active");
+
+    const view = this.dataset.view;
+
+    document.getElementById("overviewView").style.display = view === "overview" ? "" : "none";
+    document.getElementById("holdingsView").style.display = view === "holdings" ? "" : "none";
+    document.getElementById("settingsView").style.display = view === "settings" ? "" : "none";
+
+    if (view === "holdings") {
+      renderHoldings();
+    }
+  });
+});
+
+function getThemeIcon(theme) {
+  if (theme === "light") return "☀";
+  if (theme === "red") return "◉";
+  return "☾";
+}
+
+function getThemeFromLabel(label) {
+  if (label.includes("Light")) return "light";
+  if (label.includes("Red")) return "red";
+  return "dark";
+}
+
+function getCssVar(name) {
+  return getComputedStyle(document.body).getPropertyValue(name).trim();
+}
+
+function applyTheme(theme) {
+  document.body.dataset.theme = theme;
+  localStorage.setItem("lctTheme", theme);
+
+  document.getElementById("themeToggle").textContent = getThemeIcon(theme);
+
+  document.querySelectorAll(".themeOption").forEach(option => {
+    option.classList.toggle(
+      "active",
+      getThemeFromLabel(option.dataset.themeLabel) === theme
+    );
+  });
+
+  if (valueChart) {
+    const activeMode = document.querySelector(".chartMode.active")?.dataset.mode || "all";
+    requestChartRender(activeMode);
+  }
+}
+
+applyTheme(localStorage.getItem("lctTheme") || "dark");
+
+document.getElementById("themeToggle").addEventListener("click", function(e) {
+  e.stopPropagation();
+  document.getElementById("themeDropdown").classList.toggle("open");
+});
+
+document.querySelectorAll(".themeOption").forEach(option => {
+  option.addEventListener("click", function(e) {
+    e.stopPropagation();
+
+    const selectedTheme = getThemeFromLabel(this.dataset.themeLabel);
+    applyTheme(selectedTheme);
+
+    document.getElementById("themeDropdown").classList.remove("open");
+  });
+});
+
+document.addEventListener("click", function() {
+  document.getElementById("themeDropdown").classList.remove("open");
+});
+
+document.getElementById("chartLock").addEventListener("click", function() {
+
+  chartLocked = !chartLocked;
+
+  this.classList.toggle("active", chartLocked);
+
+  if (chartLocked) {
+
+    valueChart.$hoverX = null;
+    valueChart.draw();
+
+  } else {
+
+    updatePortfolioHeader();
+
+  }
+});
+
+/* Old API/chart fetch system removed in V2.8. PriceEngine now handles live, intraday, and daily gap-fill data. */
+
+function preserveScrollPosition(callback) {
+  const scrollX = window.scrollX;
+  const scrollY = window.scrollY;
+
+  callback();
+
+  requestAnimationFrame(() => {
+    window.scrollTo(scrollX, scrollY);
+  });
+}
+
+document.getElementById("wipeTxs").addEventListener("click", function() {
+  showAppConfirm(
+    "Wipe Transactions?",
+    "This will delete all transactions from the dashboard.",
+    function() {
+      showAppConfirm(
+        "Are You Absolutely Sure?",
+        "This second confirmation is to prevent accidental wipes. This cannot be undone.",
+        function() {
+          transactions = [];
+          transactionIdCounter = 1;
+          editingTxId = null;
+          currentPage = 1;
+
+          saveTransactions();
+
+          recalculatePortfolioState();
+          updatePortfolioHeader();
+          renderHoldings();
+          renderTransactionTables();
+          updateSettingsPanel();
+
+          const activeMode =
+            document.querySelector(".chartMode.active")?.dataset.mode || "all";
+
+          requestChartRender(activeMode);
+
+          showAppAlert("Transactions Removed", "All transactions were removed.");
+        }
+      );
+    }
+  );
+});
+
+let refreshIntervalMs = 60000;
+let refreshTimer = null;
+
+function setRefreshInterval(ms) {
+  refreshIntervalMs = ms;
+
+  document.querySelectorAll(".refreshIntervalBtn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.interval === String(ms));
+  });
+
+  const label = document.getElementById("settingsRefreshInterval");
+  if (label) {
+    label.textContent =
+      ms === "manual" ? "Manual" :
+      Number(ms) === 30000 ? "30s" :
+      Number(ms) === 60000 ? "60s" :
+      Number(ms) === 300000 ? "5m" :
+      "60s";
+  }
+
+  if (refreshTimer) {
+    clearInterval(refreshTimer);
+    refreshTimer = null;
+  }
+
+  if (ms !== "manual") {
+    refreshTimer = setInterval(async function() {
+      await refreshAllLivePrices({ renderChart: false });
+    }, Number(ms));
+  }
+}
+
+document.querySelectorAll(".refreshIntervalBtn").forEach(btn => {
+  btn.addEventListener("click", function() {
+    setRefreshInterval(this.dataset.interval);
+  });
+});
+
+document.getElementById("clearApiCache").addEventListener("click", function() {
+  clearPriceEngineChartCache();
+  updateSettingsPanel();
+
+  const activeMode =
+    document.querySelector(".chartMode.active")?.dataset.mode || "all";
+
+  requestChartRender(activeMode);
+});
+
+function sanitizeBackupFileName(name) {
+  const cleaned = String(name || "")
+    .trim()
+    .replace(/[^a-z0-9-_ ]/gi, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .toLowerCase();
+
+  return cleaned || "portfolio-backup";
+}
+
+function serializeTransactionForBackup(t) {
+  const timestampDate = parseStoredTimestamp(t && t.timestamp);
+
+  if (!timestampDate) {
+    throw new Error("Transaction is missing a valid timestamp.");
+  }
+
+  return {
+    id: Number(t.id) || 0,
+    timestamp: timestampDate.toISOString(),
+    date: dateKeyFromDate(dateOnly(timestampDate)),
+    coin: t.coin || "KAS",
+    type: t.type,
+    amount: Number(t.amount) || 0,
+    price: Number(t.price) || 0,
+    total: Number(t.total) || 0,
+    notes: t.notes || ""
+  };
+}
+
+function parseBackupTransaction(t) {
+  const normalized = normalizeTransactionForRuntime(t);
+
+  if (!normalized) {
+    throw new Error("Backup transaction is missing a valid timestamp.");
+  }
+
+  return normalized;
+}
+
+function getTransactionsForPortfolioBackup(portfolioId) {
+  if (portfolioId === activePortfolioId) {
+    return transactions.map(serializeTransactionForBackup);
+  }
+
+  try {
+    const saved = localStorage.getItem("lctTransactionsV1_" + portfolioId);
+    const parsed = saved ? JSON.parse(saved) : [];
+
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed.map(serializeTransactionForBackup);
+  } catch (e) {
+    return [];
+  }
+}
+
+function buildFullBackup() {
+  const portfolioTransactions = {};
+
+  portfolios.forEach(portfolio => {
+    portfolioTransactions[portfolio.id] = getTransactionsForPortfolioBackup(portfolio.id);
+  });
+
+  return {
+    app: "Local Crypto Portfolio Tracker",
+    version: "V2.7.1",
+    exportedAt: new Date().toISOString(),
+    theme: localStorage.getItem("lctTheme") || "dark",
+    activePortfolioId,
+    portfolios: portfolios.map(p => ({
+      id: p.id,
+      name: p.name
+    })),
+    portfolioTransactions,
+    transactions: portfolioTransactions[activePortfolioId] || [],
+    customCoins,
+    customHistoricalPrices
+  };
+}
+
+function clearStoredPortfolioTransactions() {
+  const keysToRemove = [];
+
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+
+    if (key && key.startsWith("lctTransactionsV1_")) {
+      keysToRemove.push(key);
+    }
+  }
+
+  keysToRemove.forEach(key => localStorage.removeItem(key));
+}
+
+function savePortfolioTransactionsFromBackup(portfolioTransactions) {
+  Object.entries(portfolioTransactions || {}).forEach(([portfolioId, txList]) => {
+    if (!Array.isArray(txList)) return;
+
+    const normalized = txList.map(parseBackupTransaction).map(serializeTransactionForBackup);
+
+    localStorage.setItem(
+      "lctTransactionsV1_" + portfolioId,
+      JSON.stringify(normalized)
+    );
+  });
+}
+
+function collectCoinSymbolsFromTransactionList(txList) {
+  const symbols = new Set();
+
+  if (!Array.isArray(txList)) {
+    return symbols;
+  }
+
+  txList.forEach(tx => {
+    const symbol = normalizeCoinSymbol(tx && tx.coin ? tx.coin : "KAS");
+    if (symbol) symbols.add(symbol);
+  });
+
+  return symbols;
+}
+
+function collectCoinSymbolsFromBackup(backup) {
+  const symbols = new Set();
+
+  if (
+    backup &&
+    backup.portfolioTransactions &&
+    typeof backup.portfolioTransactions === "object" &&
+    !Array.isArray(backup.portfolioTransactions)
+  ) {
+    Object.values(backup.portfolioTransactions).forEach(txList => {
+      collectCoinSymbolsFromTransactionList(txList).forEach(symbol => symbols.add(symbol));
+    });
+  }
+
+  if (backup && Array.isArray(backup.transactions)) {
+    collectCoinSymbolsFromTransactionList(backup.transactions).forEach(symbol => symbols.add(symbol));
+  }
+
+  return Array.from(symbols);
+}
+
+async function ensureBackupImportedCoinsExist(backup) {
+  const symbols = collectCoinSymbolsFromBackup(backup);
+  let changed = false;
+
+  for (const symbol of symbols) {
+    if (!symbol || COINS[symbol]) continue;
+
+    const assetLogo = await findAssetLogoForSymbol(symbol);
+
+    customCoins[symbol] = {
+      name: symbol,
+      coinGeckoId: "",
+      coinPaprikaId: "",
+      logo: assetLogo || makeFallbackCoinLogo(symbol),
+      logoScale: 1
+    };
+
+    changed = true;
+    rebuildCoins();
+  }
+
+  if (changed) {
+    saveCustomCoins();
+    rebuildCoins();
+  }
+}
+
+function downloadBackupFile(fileNameBase) {
+  const backup = buildFullBackup();
+
+  const blob = new Blob([JSON.stringify(backup, null, 2)], {
+    type: "application/json"
+  });
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+
+  a.href = url;
+  a.download = sanitizeBackupFileName(fileNameBase) + ".json";
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+function openBackupNameModal() {
+  const input = document.getElementById("backupNameInput");
+
+  input.value = "portfolio-backup";
+  document.getElementById("backupNameModal").style.display = "flex";
+
+  setTimeout(() => {
+    input.focus();
+    input.select();
+  }, 50);
+}
+
+function closeBackupNameModal() {
+  document.getElementById("backupNameModal").style.display = "none";
+}
+
+function confirmBackupExport() {
+  const input = document.getElementById("backupNameInput");
+  const fileName = input.value.trim() || "portfolio-backup";
+
+  closeBackupNameModal();
+  downloadBackupFile(fileName);
+}
+
+document.getElementById("exportBackup").addEventListener("click", function() {
+  openBackupNameModal();
+});
+
+document.getElementById("confirmExportBackup").addEventListener("click", function() {
+  confirmBackupExport();
+});
+
+document.getElementById("cancelExportBackup").addEventListener("click", function() {
+  closeBackupNameModal();
+});
+
+document.getElementById("backupNameInput").addEventListener("keydown", function(e) {
+  if (e.key === "Enter") {
+    confirmBackupExport();
+  }
+});
+
+document.getElementById("importBackup").addEventListener("click", function() {
+  document.getElementById("backupFileInput").click();
+});
+
+document.getElementById("backupFileInput").addEventListener("change", function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function(event) {
+    try {
+      const backup = JSON.parse(event.target.result);
+      const hasFullBackup =
+        backup.portfolios &&
+        Array.isArray(backup.portfolios) &&
+        backup.portfolioTransactions &&
+        typeof backup.portfolioTransactions === "object";
+
+      const hasLegacyBackup = backup.transactions && Array.isArray(backup.transactions);
+
+      if (!hasFullBackup && !hasLegacyBackup) {
+        showAppAlert("Invalid Backup", "This file does not look like a valid portfolio backup.");
+        e.target.value = "";
+        return;
+      }
+
+      const confirmMessage = hasFullBackup
+        ? "This will replace all current portfolios, transactions, custom coins, and custom historical price data."
+        : "This will replace all current transactions in the active portfolio.";
+
+      showAppConfirm(
+        "Import Backup?",
+        confirmMessage,
+        function() {
+          (async function() {
+            try {
+              if (hasFullBackup) {
+                const restoredPortfolios = backup.portfolios
+                  .filter(p => p && p.id && p.name)
+                  .map(p => ({
+                    id: String(p.id),
+                    name: String(p.name)
+                  }));
+
+                portfolios = restoredPortfolios.length > 0
+                  ? restoredPortfolios
+                  : [{ id: "main", name: "My Portfolio" }];
+
+                activePortfolioId = portfolios.some(p => p.id === backup.activePortfolioId)
+                  ? backup.activePortfolioId
+                  : portfolios[0].id;
+
+                customCoins = backup.customCoins && typeof backup.customCoins === "object" && !Array.isArray(backup.customCoins)
+                  ? backup.customCoins
+                  : {};
+
+                customHistoricalPrices = backup.customHistoricalPrices && typeof backup.customHistoricalPrices === "object" && !Array.isArray(backup.customHistoricalPrices)
+                  ? backup.customHistoricalPrices
+                  : {};
+
+                rebuildCoins();
+                await ensureBackupImportedCoinsExist(backup);
+
+                localStorage.setItem(PORTFOLIOS_KEY, JSON.stringify(portfolios));
+                localStorage.setItem(ACTIVE_PORTFOLIO_KEY, activePortfolioId);
+                saveCustomCoins();
+                saveCustomHistoricalPrices();
+
+                clearStoredPortfolioTransactions();
+                savePortfolioTransactionsFromBackup(backup.portfolioTransactions);
+
+                rebuildCoins();
+                loadHistoricalPrices();
+                populateCoinDropdown();
+                transactions = loadTransactions();
+              } else {
+                await ensureBackupImportedCoinsExist(backup);
+                transactions = backup.transactions.map(parseBackupTransaction);
+                sortTransactionsNewestFirst();
+                saveTransactions();
+              }
+
+              transactionIdCounter =
+                transactions.length > 0
+                  ? Math.max(...transactions.map(t => t.id)) + 1
+                  : 1;
+
+              if (backup.theme) {
+                applyTheme(backup.theme);
+              }
+
+              sortTransactionsNewestFirst();
+              recalculatePortfolioState();
+              updatePortfolioHeader();
+              renderHoldings();
+              renderTransactionTables();
+              updateSettingsPanel();
+              renderPortfolioMenu();
+              renderPortfolioPicker();
+              renderEditCoinsList();
+
+              const activeMode = document.querySelector(".chartMode.active")?.dataset.mode || "all";
+              requestChartRender(activeMode);
+
+              showAppAlert("Backup Imported", "Your backup was restored successfully.");
+            } catch (err) {
+              showAppAlert("Backup Failed", "The backup could not be imported.");
+            }
+          })();
+        }
+      );
+    } catch (err) {
+      showAppAlert("Backup Failed", "The backup could not be imported.");
+    }
+
+    e.target.value = "";
+  };
+
+  reader.readAsText(file);
+});
+
+async function initializeApp() {
+  updateApiStatusUI();
+  loadLastGoodLivePrices();
+
+  recalculatePortfolioState();
+  updatePortfolioHeader();
+  renderTransactionTables();
+  renderHoldings();
+  updateSettingsPanel();
+
+  await refreshAllLivePrices({ renderChart: false, preserveScroll: false });
+
+  recalculatePortfolioState();
+  updatePortfolioHeader();
+  renderTransactionTables();
+  renderHoldings();
+  updateSettingsPanel();
+  requestChartRender("all");
+
+  setRefreshInterval(60000);
+}
+
+initializeApp();
+document.getElementById("manualRefreshApi").addEventListener("click", async function() {
+  const btn = this;
+  const oldText = btn.textContent;
+
+  btn.textContent = "Refreshing...";
+  btn.style.pointerEvents = "none";
+  btn.style.opacity = "0.65";
+
+  await refreshAllLivePrices({ renderChart: true });
+
+  btn.textContent = "Updated";
+  
+  setTimeout(() => {
+    btn.textContent = oldText;
+    btn.style.pointerEvents = "";
+    btn.style.opacity = "";
+  }, 1200);
+});
+</script>
+
+</body>
+</html>

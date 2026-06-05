@@ -1,0 +1,1731 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+  <title>BRT's Portfolio</title>
+  <script src="chart.umd.min.js"></script>
+
+<link rel="stylesheet" href="flatpickr.min.css">
+<script src="flatpickr.min.js"></script>
+
+<script src="kaspa-prices.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      background: #121520;
+      color: #f4f6ff;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", Arial, sans-serif;
+    }
+
+.txRow {
+  cursor: pointer;
+}
+
+.txRow:hover {
+  background: rgba(255,255,255,0.03);
+}
+
+    .app {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 28px;
+    }
+
+    h1 {
+      font-size: 46px;
+      margin: 0;
+      letter-spacing: -1px;
+    }
+
+    .sub {
+      color: #8f96aa;
+      margin-top: 8px;
+      font-size: 18px;
+    }
+
+    .priceBox {
+      text-align: right;
+      font-size: 16px;
+      color: #9ca3b7;
+    }
+
+    .price {
+      font-size: 30px;
+      color: white;
+      font-weight: 800;
+    }
+
+    .green { color: #16d18a; }
+    .red { color: #ff4d63; }
+
+    .tabs {
+      display: flex;
+      gap: 38px;
+      border-bottom: 1px solid #2b3041;
+      margin-bottom: 26px;
+    }
+
+    .tab {
+  padding: 10px 14px 15px 14px;
+  font-size: 25px;
+  color: #8f96aa;
+  cursor: pointer;
+  border-radius: 12px 12px 0 0;
+  transition: background 0.15s ease, transform 0.12s ease, color 0.15s ease;
+  user-select: none;
+   }
+
+    .tab:hover {
+  background: rgba(255,255,255,0.07);
+  color: white;
+  transform: translateY(-1px);
+  }
+
+    .tab:active {
+  transform: scale(0.96);
+  }
+
+    .tab.active {
+      color: white;
+      font-weight: 800;
+      border-bottom: 4px solid #3867ff;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .card, .panel {
+      background: linear-gradient(180deg, #1b2030, #171b29);
+      border: 1px solid #2a3042;
+      border-radius: 16px;
+      box-shadow: 0 14px 35px rgba(0,0,0,.25);
+    }
+
+    .card {
+      padding: 20px;
+    }
+
+    .label {
+      color: #9aa2b8;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .value {
+      font-size: 28px;
+      font-weight: 850;
+    }
+
+    .small {
+      font-size: 14px;
+      margin-top: 8px;
+    }
+
+    .panel {
+      padding: 22px;
+      margin-bottom: 22px;
+    }
+
+    .panelHead {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .pillRow {
+      display: flex;
+      gap: 8px;
+    }
+
+    .pill {
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.07);
+  color: #b9bfd0;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: background 0.15s ease, transform 0.12s ease, color 0.15s ease, border 0.15s ease;
+  user-select: none;
+}
+
+.pill:hover {
+  background: rgba(255,255,255,0.13);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.pill:active,
+.page:active {
+  transform: scale(0.96);
+}
+
+.pill.active {
+  background: linear-gradient(180deg, #4767ff, #3457ff);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 8px 22px rgba(52,87,255,0.30);
+}
+.pill.active:hover {
+  transform: translateY(0);
+}
+
+    canvas {
+      max-height: 380px;
+    }
+
+.chartDateRow {
+  display: flex;
+  justify-content: space-between;
+  color: #8f96aa;
+  font-size: 15px;
+  font-weight: 700;
+  margin-top: -10px;
+  padding: 0 8px;
+}
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+    }
+
+    th {
+      color: #9aa2b8;
+      font-weight: 600;
+      text-align: left;
+      padding: 14px;
+      border-bottom: 1px solid #2c3346;
+    }
+
+    td {
+      padding: 15px 14px;
+      border-bottom: 1px solid #242a3a;
+      color: #e7eaff;
+    }
+
+  .mainBalance {
+  margin: 10px 0 28px 0;
+  padding: 8px 2px 4px 2px;
+   }
+
+  .bigUsd {
+  font-size: 56px;
+  font-weight: 900;
+  letter-spacing: -2px;
+  color: #ffffff;
+  }
+
+  .dayChange {
+  margin-top: 8px;
+  font-size: 24px;
+  font-weight: 750;
+  }
+
+  .dayChange.green {
+  color: #16d18a;
+  }
+
+ .dayChange.red {
+  color: #ff4d63;
+ }
+
+    .coin {
+      display: inline-flex;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      align-items: center;
+      justify-content: center;
+      background: #77e0cc;
+      color: #111520;
+      font-weight: 900;
+      margin-right: 10px;
+    }
+
+    .coinIcon {
+  width: 34px;
+  height: 34px;
+  margin-right: 12px;
+  vertical-align: middle;
+   }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+
+    .summaryBox {
+      border-left: 1px solid #30374a;
+      padding-left: 18px;
+    }
+
+   .searchBar {
+  background: #101420;
+  border: 1px solid #2b3041;
+  color: #aab2c8;
+  padding: 13px 16px;
+  border-radius: 12px;
+  min-width: 260px;
+  margin-bottom: 18px;
+}
+
+    .footerPages {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 20px;
+      color: #9aa2b8;
+    }
+
+   .page {
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.07);
+  color: #b9bfd0;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: background 0.15s ease, transform 0.12s ease, color 0.15s ease, border 0.15s ease;
+  user-select: none;
+}
+
+.page:hover {
+  background: rgba(255,255,255,0.13);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.page.active {
+  background: linear-gradient(180deg, #4767ff, #3457ff);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 8px 22px rgba(52,87,255,0.30);
+}
+
+#editModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(5,8,15,0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modalCard {
+  width: 420px;
+  max-width: 92%;
+  background: linear-gradient(180deg, #1b2030, #171b29);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 28px;
+  padding: 26px;
+  box-shadow: 0 28px 80px rgba(0,0,0,0.55);
+}
+
+.modalCard h2 {
+  margin-top: 0;
+  margin-bottom: 24px;
+  font-size: 34px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+
+.modalCard label {
+  display: block;
+  margin-top: 14px;
+  margin-bottom: 8px;
+  color: #8f96aa;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.modalCard input,
+.modalCard select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(16,20,32,0.92);
+  color: white;
+  font-weight: 700;
+  outline: none;
+}
+
+.modalCard input:focus,
+.modalCard select:focus {
+  border-color: rgba(71,103,255,0.75);
+  box-shadow: 0 0 0 3px rgba(71,103,255,0.18);
+}
+
+.modalButtons {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.modalButtons button {
+  flex: 1;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.07);
+  color: #b9bfd0;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: background 0.15s ease,
+              transform 0.12s ease,
+              color 0.15s ease,
+              border 0.15s ease;
+}
+
+.modalButtons button:hover {
+  background: rgba(255,255,255,0.13);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.modalButtons button:active {
+  transform: scale(0.96);
+}
+
+#saveTx {
+  background: linear-gradient(180deg, #4767ff, #3457ff);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 8px 22px rgba(52,87,255,0.30);
+}
+
+#cancelTx {
+  background: rgba(255,255,255,0.07);
+  color: #b9bfd0;
+}
+
+#cancelTx:hover {
+  background: rgba(255,255,255,0.13);
+  color: white;
+}
+
+#deleteTx {
+  background: rgba(255,77,99,0.13);
+  color: #ff4d63;
+  border: 1px solid rgba(255,77,99,0.28);
+}
+
+#deleteTx:hover {
+  background: rgba(255,77,99,0.22);
+  color: #ff6b7d;
+}
+
+#deleteConfirmModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(5,8,15,0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+#confirmDeleteTx {
+  background: rgba(255,77,99,0.13);
+  color: #ff4d63;
+  border: 1px solid rgba(255,77,99,0.28);
+}
+
+#confirmDeleteTx:hover {
+  background: rgba(255,77,99,0.22);
+  color: #ff6b7d;
+}
+
+.modalCard input[type="number"]::-webkit-outer-spin-button,
+.modalCard input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.modalCard input[type="number"] {
+  appearance: textfield;
+}
+
+.flatpickr-calendar {
+  background: #1b2030 !important;
+  border: 1px solid #2a3042 !important;
+  border-radius: 18px !important;
+  box-shadow: 0 20px 60px rgba(0,0,0,.45) !important;
+}
+
+.flatpickr-months .flatpickr-month,
+.flatpickr-current-month,
+.flatpickr-weekdays,
+.flatpickr-weekday,
+.flatpickr-day {
+  color: white !important;
+}
+
+.flatpickr-weekday {
+  color: #8f96aa !important;
+}
+
+.flatpickr-day:hover {
+  background: rgba(71,103,255,.18) !important;
+}
+
+.flatpickr-day.selected {
+  background: #4767ff !important;
+  border-color: #4767ff !important;
+}
+
+.flatpickr-monthDropdown-months,
+.numInput {
+  color: white !important;
+  background: transparent !important;
+}
+
+.flatpickr-prev-month,
+.flatpickr-next-month {
+  fill: white !important;
+}
+
+.flatpickr-monthDropdown-months {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background: #242a3a !important;
+  color: #f4f6ff !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  border-radius: 10px !important;
+  padding: 4px 26px 4px 10px !important;
+  font-weight: 800 !important;
+  box-shadow: none !important;
+}
+
+.flatpickr-current-month .numInputWrapper {
+  background: #242a3a !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+}
+
+.flatpickr-current-month input.cur-year {
+  color: #f4f6ff !important;
+  font-weight: 800 !important;
+  box-shadow: none !important;
+}
+
+.flatpickr-current-month .numInputWrapper span {
+  display: none !important;
+}
+
+.flatpickr-current-month {
+  padding-top: 3px !important;
+}
+
+  </style>
+</head>
+
+<body>
+<div class="app">
+
+  <div class="top">
+    <div>
+      <h1>BRT's Portfolio</h1>
+      <div class="sub">Kaspa local tracker · fake demo data</div>
+    </div>
+
+    <div class="priceBox">
+      Current KAS Price
+      <div class="price" id="currentPrice">$0.03471</div>
+      <div class="green">▲ 2.17% 24h</div>
+    </div>
+  </div>
+
+ <div class="tabs">
+  <div class="tab active" data-view="overview">Overview</div>
+  <div class="tab" data-view="holdings">Holdings</div>
+  <div class="tab" data-view="unnamed1">[Blank]</div>
+  <div class="tab" data-view="unnamed2">[Blank]</div>
+</div>
+
+<div id="overviewView">
+
+  <div class="mainBalance">
+  <div class="bigUsd" id="portfolioValue">$0</div>
+  <div class="dayChange green" id="dayChange">24h: + $0</div>
+</div>
+
+  <div class="panel">
+    <div class="panelHead">
+      <h2>Portfolio Performance</h2>
+      <div class="pillRow">
+  <div class="pill chartMode" data-mode="24h">24h</div>
+  <div class="pill chartMode" data-mode="7d">7d</div>
+  <div class="pill chartMode" data-mode="30d">30d</div>
+  <div class="pill chartMode" data-mode="90d">90d</div>
+  <div class="pill chartMode" data-mode="1y">1y</div>
+  <div class="pill chartMode active" data-mode="all">All</div>
+</div>
+    </div>
+    <canvas id="valueChart"></canvas>
+
+<div class="chartDateRow">
+  <span id="chartStartLabel">May 2022</span>
+  <span id="chartEndLabel">May 2026</span>
+</div>
+  </div>
+
+  <div class="panelHead">
+  <h2>All Transactions</h2>
+
+  <div class="pillRow">
+    <div class="pill txTypeFilter active" data-type="all">All Types</div>
+    <div class="pill txTypeFilter" data-type="buy">Buys</div>
+    <div class="pill txTypeFilter" data-type="sell">Sells</div>
+<div class="pill" id="addTx">Add Transaction</div>
+<div class="pill" id="clearAllTx">Clear All</div>
+  </div>
+</div>
+
+<input class="searchBar" placeholder="Search transactions..." />
+
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Type</th>
+          <th>KAS Amount</th>
+          <th>Price</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody id="allRows"></tbody>
+    </table>
+
+        <div class="footerPages" id="pagination"></div>
+  </div>
+
+<div id="holdingsView" style="display:none;">
+  <div class="panel">
+    <div class="panelHead">
+      <h2>Holdings</h2>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Coin</th>
+          <th>Holdings</th>
+          <th>Current Value</th>
+          <th>Cost Basis</th>
+          <th>Avg Cost</th>
+          <th>P/L</th>
+          <th>Allocation</th>
+        </tr>
+      </thead>
+      <tbody id="holdingsRows"></tbody>
+    </table>
+  </div>
+</div>
+
+<div id="unnamed1View" style="display:none;">
+  <div class="panel">
+    <h2>Unnamed</h2>
+  </div>
+</div>
+
+<div id="unnamed2View" style="display:none;">
+  <div class="panel">
+    <h2>Unnamed</h2>
+  </div>
+</div>
+
+</div>
+
+<div id="editModal" style="display:none;">
+  <div class="modalCard">
+   <h2 id="txModalTitle">Edit Transaction</h2>
+
+    <label>Date</label>
+    <input id="editDate" type="text">
+
+   <label>Type</label>
+
+<div class="pillRow" id="editTypeRow">
+  <div class="pill editTypeBtn active" id="editBuy" data-type="Buy">Buy</div>
+  <div class="pill editTypeBtn" id="editSell" data-type="Sell">Sell</div>
+</div>
+
+<input id="editType" type="hidden" value="Buy">
+
+    <label>KAS Amount</label>
+    <input id="editAmount" type="number">
+
+    <label>Price</label>
+    <input id="editPrice" type="number" step="0.000001">
+
+    <div class="modalButtons">
+  <button id="saveTx">Save</button>
+  <button id="deleteTx">Delete</button>
+  <button id="cancelTx">Cancel</button>
+</div>
+  </div>
+</div>
+
+<div id="deleteConfirmModal" style="display:none;">
+  <div class="modalCard">
+    <h2>Delete Transaction?</h2>
+    <div class="sub" style="margin-bottom:22px;">
+      This can’t be undone.
+    </div>
+
+    <div class="modalButtons">
+      <button id="confirmDeleteTx">Delete</button>
+      <button id="cancelDeleteTx">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const CURRENT_PRICE = 0.03471;
+
+function localDateFromInput(value) {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function todayLocalDate() {
+  const today = new Date();
+  return new Date(today.getFullYear(), today.getMonth(), today.getDate());
+}
+
+function dateOnly(d) {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+function money(n) {
+  return "$" + n.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
+
+function kas(n) {
+  return Math.round(n).toLocaleString();
+}
+
+function price(n) {
+  return "$" + n.toFixed(5);
+}
+
+function fakeKasPrice(dayIndex) {
+  const base = 0.0018;
+  const cycle1 = Math.sin(dayIndex / 70) * 0.006;
+  const cycle2 = Math.sin(dayIndex / 19) * 0.002;
+  const bullRun = dayIndex > 420 ? (dayIndex - 420) * 0.00006 : 0;
+  const correction = dayIndex > 850 ? Math.sin(dayIndex / 45) * 0.018 : 0;
+  const lateChop = dayIndex > 1050 ? Math.sin(dayIndex / 12) * 0.006 : 0;
+  return Math.max(0.0012, base + cycle1 + cycle2 + bullRun + correction + lateChop);
+}
+
+function generateTransactions() {
+  const txs = [];
+  const start = new Date("2022-06-01");
+  const end = new Date("2026-05-22");
+
+  let runningKas = 0;
+  let dayIndex = 0;
+
+  function seededRandom(seed) {
+    const x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+  }
+
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 2)) {
+    const r1 = seededRandom(dayIndex + 1);
+    const r2 = seededRandom(dayIndex + 2);
+    const r3 = seededRandom(dayIndex + 3);
+
+    const p = fakeKasPrice(dayIndex);
+
+    const canSell = runningKas > 75000 && dayIndex > 240;
+    const isSell = canSell && r1 < 0.22;
+
+    let amount;
+
+    if (isSell) {
+      amount = Math.min(runningKas * (0.025 + r2 * 0.08), 42000);
+      runningKas -= amount;
+    } else {
+      amount = 3500 + r2 * 18000;
+
+      if (r3 < 0.08) {
+        amount += 25000 + r1 * 55000;
+      }
+
+      runningKas += amount;
+    }
+
+    amount = Math.round(amount / 100) * 100;
+
+    txs.push({
+      date: new Date(d),
+      type: isSell ? "Sell" : "Buy",
+      amount,
+      price: p,
+      total: amount * p
+    });
+
+    dayIndex += 2;
+  }
+
+  return txs.reverse();
+}
+
+function buildDemoRawTransactions() {
+  const rows = [];
+  const start = new Date("2022-06-01");
+  const end = new Date("2026-05-22");
+
+  function seededRandom(seed) {
+    const x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+  }
+
+  let runningKas = 0;
+  let i = 1;
+
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 3)) {
+    const r1 = seededRandom(i);
+    const r2 = seededRandom(i + 99);
+    const r3 = seededRandom(i + 333);
+
+    const days = Math.floor((d - start) / (1000 * 60 * 60 * 24));
+    const p = fakeKasPrice(days);
+
+    const canSell = runningKas > 50000 && r1 < 0.18;
+    const type = canSell ? "Sell" : "Buy";
+
+    let amount = 3500 + r2 * 22000;
+
+    if (type === "Sell") {
+      amount = Math.min(amount, runningKas * 0.18);
+      runningKas -= amount;
+    } else {
+      if (r3 < 0.08) amount += 25000 + r1 * 60000;
+      runningKas += amount;
+    }
+
+    rows.push({
+      date: d.toISOString().slice(0, 10),
+      type,
+      amount: Math.round(amount / 100) * 100,
+      price: p
+    });
+
+    i++;
+  }
+
+  return rows;
+}
+
+const rawTransactions = buildDemoRawTransactions();
+
+let transactionIdCounter = 1;
+
+let transactions = rawTransactions.map(t => ({
+  id: transactionIdCounter++,
+  date: new Date(t.date),
+  type: t.type,
+  amount: t.amount,
+  price: t.price,
+  total: t.amount * t.price
+})).reverse();
+
+function sortTransactionsNewestFirst() {
+  transactions.sort((a, b) => b.date - a.date);
+}
+
+let editingTxId = null;
+let holdings = 0;
+let invested = 0;
+let buys = 0;
+let sells = 0;
+let portfolioValue = 0;
+let profit = 0;
+let avgBuy = 0;
+let portfolioHistory = [];
+let fakeDayChange = 0;
+
+function recalculatePortfolioState() {
+  holdings = 0;
+  invested = 0;
+  buys = 0;
+  sells = 0;
+
+  transactions.slice().reverse().forEach(t => {
+    if (t.type === "Buy") {
+      holdings += t.amount;
+      invested += t.total;
+      buys++;
+    } else {
+      const avgCost = holdings > 0 ? invested / holdings : 0;
+      holdings -= t.amount;
+      invested -= avgCost * t.amount;
+      sells++;
+    }
+  });
+
+  portfolioValue = holdings * CURRENT_PRICE;
+  profit = portfolioValue - invested;
+  avgBuy = holdings > 0 ? invested / holdings : 0;
+
+  portfolioHistory = buildPortfolioHistory();
+
+  const yesterdayValue = portfolioHistory[portfolioHistory.length - 2]?.value || portfolioValue;
+  fakeDayChange = portfolioValue - yesterdayValue;
+}
+
+function updatePortfolioHeader() {
+  document.getElementById("portfolioValue").textContent = money(portfolioValue);
+
+  const previousPortfolioValue = portfolioValue - fakeDayChange;
+  const fakeDayPercent = previousPortfolioValue !== 0
+    ? (fakeDayChange / previousPortfolioValue) * 100
+    : 0;
+
+  const dayChangeEl = document.getElementById("dayChange");
+  const sign = fakeDayChange >= 0 ? "+" : "-";
+  const arrow = fakeDayChange >= 0 ? "▲" : "▼";
+  const colorClass = fakeDayChange >= 0 ? "green" : "red";
+
+  dayChangeEl.textContent =
+    "24h: " +
+    sign +
+    money(Math.abs(fakeDayChange)) +
+    " (" +
+    arrow +
+    " " +
+    Math.abs(fakeDayPercent).toFixed(2) +
+    "%)";
+
+  dayChangeEl.className = "dayChange " + colorClass;
+  dayChangeEl.style.color = "";
+}
+
+function calculateHoldingsSummary() {
+  return [{
+    coin: "KAS",
+    holdings,
+    currentValue: portfolioValue,
+    costBasis: invested,
+    avgCost: avgBuy,
+    profitLoss: profit,
+    allocation: portfolioValue > 0 ? 100 : 0
+  }];
+}
+
+function renderHoldings() {
+  const rows = calculateHoldingsSummary();
+  const holdingsRows = document.getElementById("holdingsRows");
+  if (!holdingsRows) return;
+
+  holdingsRows.innerHTML = rows.map(asset => {
+    const plClass = asset.profitLoss >= 0 ? "green" : "red";
+    const plSign = asset.profitLoss >= 0 ? "+" : "-";
+
+    return `
+      <tr>
+        <td><img class="coinIcon" src="assets/kaspa-logo.png"><span>${asset.coin}</span></td>
+        <td>${kas(asset.holdings)}</td>
+        <td>${money(asset.currentValue)}</td>
+        <td>${money(asset.costBasis)}</td>
+        <td>${price(asset.avgCost)}</td>
+        <td class="${plClass}">${plSign}${money(Math.abs(asset.profitLoss))}</td>
+        <td>${asset.allocation.toFixed(2)}%</td>
+      </tr>
+    `;
+  }).join("");
+}
+
+sortTransactionsNewestFirst();
+recalculatePortfolioState();
+
+
+
+updatePortfolioHeader();
+renderHoldings();
+
+function rowHtml(t, index) {
+  const color = t.type === "Buy" ? "green" : "red";
+  const sign = t.type === "Buy" ? "+" : "-";
+  return `
+    <tr class="txRow" data-id="${t.id}">
+      <td>${t.date.toLocaleDateString(undefined, {month:"short", day:"numeric", year:"numeric"})}</td>
+      <td><img class="coinIcon" src="assets/kaspa-logo.png"><span class="${color}">${t.type}</span></td>
+      <td>${kas(t.amount)}</td>
+      <td>${price(t.price)}</td>
+      <td class="${color}">${sign}${money(t.total)}</td>
+    </tr>
+  `;
+}
+
+let valueChart;
+const hoverGuidePlugin = {
+  id: "hoverGuidePlugin",
+
+  afterEvent(chart, args) {
+    const e = args.event;
+
+    if (e.type === "mousemove") {
+      chart.$hoverX = e.x;
+      chart.draw();
+    }
+
+    if (e.type === "mouseout") {
+      chart.$hoverX = null;
+    }
+  },
+
+  afterDatasetsDraw(chart) {
+    if (!chart.$hoverX) return;
+
+    const ctx = chart.ctx;
+    const meta = chart.getDatasetMeta(0);
+    const points = meta.data;
+    if (!points || points.length < 2) return;
+
+    const x = Math.max(
+  chart.chartArea.left,
+  Math.min(chart.$hoverX, chart.chartArea.right)
+	);
+    const topY = chart.chartArea.top;
+    const bottomY = chart.chartArea.bottom;
+
+    let left = points[0];
+    let right = points[points.length - 1];
+
+    for (let i = 0; i < points.length - 1; i++) {
+      if (x >= points[i].x && x <= points[i + 1].x) {
+        left = points[i];
+        right = points[i + 1];
+        break;
+      }
+    }
+
+    const range = right.x - left.x || 1;
+    const percent = (x - left.x) / range;
+    const y = left.y + (right.y - left.y) * percent;
+
+    ctx.save();
+
+    ctx.beginPath();
+    ctx.setLineDash([4, 6]);
+    ctx.moveTo(x, topY);
+    ctx.lineTo(x, bottomY);
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = "rgba(255,255,255,0.22)";
+    ctx.stroke();
+
+    ctx.setLineDash([]);
+
+    ctx.beginPath();
+    ctx.arc(x, y, 7, 0, Math.PI * 2);
+    ctx.fillStyle = "#0f1117";
+    ctx.fill();
+
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "#ffffff";
+    ctx.stroke();
+
+    ctx.restore();
+  }
+};
+
+const modeSettings = {
+  "24h": { points: 96 },
+  "7d": { points: 112 },
+  "30d": { points: 120 },
+  "90d": { points: 180 },
+  "1y": { points: 240 },
+  "all": { points: 300 }
+};
+
+function makeHoverLabel(mode, index, totalPoints) {
+  const now = new Date();
+  const start = new Date(now);
+
+  if (mode === "24h") start.setHours(now.getHours() - 24);
+  if (mode === "7d") start.setDate(now.getDate() - 7);
+  if (mode === "30d") start.setDate(now.getDate() - 30);
+  if (mode === "90d") start.setDate(now.getDate() - 90);
+  if (mode === "1y") start.setFullYear(now.getFullYear() - 1);
+  if (mode === "all") start.setFullYear(2022, 5, 1);
+
+  const percent = index / (totalPoints - 1);
+  const time = start.getTime() + (now.getTime() - start.getTime()) * percent;
+  const d = new Date(time);
+
+  if (mode === "24h") {
+    return d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  }
+
+  if (mode === "7d" || mode === "30d" || mode === "90d") {
+    return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  }
+
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+
+function getDemoHistoricalPrice(date) {
+  const key = date.toISOString().slice(0, 10);
+
+  if (kasPrices[key]) {
+    return kasPrices[key];
+  }
+
+  return CURRENT_PRICE;
+}
+
+function buildPortfolioHistory() {
+  const history = [];
+  const start = new Date("2022-06-01");
+  const end = new Date("2026-05-22");
+  const oldestFirst = transactions.slice().reverse();
+
+  let runningKas = 0;
+  let txIndex = 0;
+  let dayIndex = 0;
+  const totalDays = Math.floor((end - start) / (1000 * 60 * 60 * 24));
+  const priceScale = CURRENT_PRICE / fakeKasPrice(totalDays);
+
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    while (
+      txIndex < oldestFirst.length &&
+      oldestFirst[txIndex].date <= d
+    ) {
+      const tx = oldestFirst[txIndex];
+
+      if (tx.type === "Buy") runningKas += tx.amount;
+      if (tx.type === "Sell") runningKas -= tx.amount;
+
+      txIndex++;
+    }
+
+    const kasPrice = getDemoHistoricalPrice(d);
+    const value = runningKas * kasPrice;
+
+    history.push({
+      date: new Date(d),
+      holdings: runningKas,
+      kasPrice: kasPrice,
+      value: value
+    });
+
+    dayIndex++;
+  }
+
+  history[history.length - 1].holdings = holdings;
+  history[history.length - 1].kasPrice = CURRENT_PRICE;
+  history[history.length - 1].value = portfolioValue;
+
+  return history;
+}
+
+function generateChartData(mode) {
+  const settings = modeSettings[mode];
+  const labels = [];
+  const values = [];
+  const hoverLabels = [];
+
+  const now = new Date();
+  const start = new Date(now);
+
+  if (mode === "24h") start.setHours(now.getHours() - 24);
+  if (mode === "7d") start.setDate(now.getDate() - 7);
+  if (mode === "30d") start.setDate(now.getDate() - 30);
+  if (mode === "90d") start.setDate(now.getDate() - 90);
+  if (mode === "1y") start.setFullYear(now.getFullYear() - 1);
+  if (mode === "all") start.setFullYear(2022, 5, 1);
+
+  let history = portfolioHistory.filter(h => h.date >= start && h.date <= now);
+
+  if (mode === "24h") {
+    const yesterdayValue = portfolioValue - fakeDayChange;
+    history = [
+      { date: start, value: yesterdayValue },
+      { date: now, value: portfolioValue }
+    ];
+  }
+
+  if (history.length < 2) {
+    history = [
+      { date: start, value: portfolioValue },
+      { date: now, value: portfolioValue }
+    ];
+  }
+
+  for (let i = 0; i < settings.points; i++) {
+    const percent = i / (settings.points - 1);
+    const targetTime = start.getTime() + (now.getTime() - start.getTime()) * percent;
+
+    let left = history[0];
+    let right = history[history.length - 1];
+
+    for (let j = 0; j < history.length - 1; j++) {
+      if (targetTime >= history[j].date.getTime() && targetTime <= history[j + 1].date.getTime()) {
+        left = history[j];
+        right = history[j + 1];
+        break;
+      }
+    }
+
+    const range = right.date.getTime() - left.date.getTime() || 1;
+    const blend = (targetTime - left.date.getTime()) / range;
+    const value = left.value + (right.value - left.value) * blend;
+
+    labels.push("");
+    values.push(Math.round(value));
+    hoverLabels.push(makeHoverLabel(mode, i, settings.points));
+  }
+
+  values[values.length - 1] = Math.round(portfolioValue);
+
+  return { labels, values, hoverLabels };
+}
+
+function updateChartDateLabels(mode) {
+  const now = new Date();
+  const start = new Date(now);
+
+  if (mode === "24h") start.setHours(now.getHours() - 24);
+  if (mode === "7d") start.setDate(now.getDate() - 7);
+  if (mode === "30d") start.setDate(now.getDate() - 30);
+  if (mode === "90d") start.setDate(now.getDate() - 90);
+  if (mode === "1y") start.setFullYear(now.getFullYear() - 1);
+  if (mode === "all") start.setFullYear(2022, 5, 1);
+
+  const format = mode === "24h"
+    ? { month: "short", day: "numeric", hour: "numeric" }
+    : { month: "short", day: "numeric", year: "numeric" };
+
+  document.getElementById("chartStartLabel").textContent =
+    start.toLocaleDateString(undefined, format);
+
+  document.getElementById("chartEndLabel").textContent =
+    now.toLocaleDateString(undefined, format);
+}
+
+function getYAxisBounds(values, mode) {
+  const minValue = Math.min(...values);
+  const maxValue = Math.max(...values);
+  const range = maxValue - minValue;
+
+  const paddingByMode = {
+    "24h": 0.35,
+    "7d": 0.28,
+    "30d": 0.22,
+    "90d": 0.18,
+    "1y": 0.14,
+    "all": 0.10
+  };
+
+  const minimumPadding = mode === "24h"
+  ? portfolioValue * 0.006
+  : portfolioValue * 0.03;
+  const padding = Math.max(range * paddingByMode[mode], minimumPadding);
+
+  return {
+  min: Math.max(0, minValue - padding),
+  max: maxValue + padding
+  };
+}
+
+function renderChart(mode) {
+  const data = generateChartData(mode);
+  updateChartDateLabels(mode);
+
+  if (valueChart) {
+    valueChart.destroy();
+  }
+
+  valueChart = new Chart(document.getElementById("valueChart"), {
+  type: "line",
+  plugins: [hoverGuidePlugin],
+  data: {
+      labels: data.labels,
+      datasets: [{
+        data: data.values,
+        tension: 0.28,
+        pointRadius: 0,
+	pointHoverRadius: 0,
+        borderColor: "#16d18a",
+        backgroundColor: "rgba(22, 209, 138, 0.18)",
+        fill: true,
+        borderWidth: 3
+      }]
+    },
+    options: {
+      responsive: true,
+	animation: false,
+	hover: {
+      animationDuration: 0
+	},
+	responsiveAnimationDuration: 0,
+      interaction: {
+  	mode: "index",
+ 	 intersect: false,
+  	axis: "x"
+	},
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false }
+      },
+      onHover: function(event) {
+  const canvasPosition = Chart.helpers.getRelativePosition(event, valueChart);
+  const xScale = valueChart.scales.x;
+  const indexFloat = xScale.getValueForPixel(canvasPosition.x);
+
+  const dataValues = valueChart.data.datasets[0].data;
+  const leftIndex = Math.max(0, Math.floor(indexFloat));
+  const rightIndex = Math.min(dataValues.length - 1, leftIndex + 1);
+
+  const percent = indexFloat - leftIndex;
+  const interpolatedValue =
+    dataValues[leftIndex] + (dataValues[rightIndex] - dataValues[leftIndex]) * percent;
+
+  document.getElementById("portfolioValue").textContent = money(interpolatedValue);
+
+const dayChangeEl = document.getElementById("dayChange");
+dayChangeEl.style.visibility = "visible";
+dayChangeEl.textContent = data.hoverLabels[leftIndex];
+dayChangeEl.className = "dayChange";
+dayChangeEl.style.color = "#8f96aa";
+  },
+      scales: {
+        x: {
+  ticks: {
+    display: true,
+    color: "#8f96aa",
+    maxTicksLimit: 6
+  },
+  grid: { display: false }
+},
+        y: {
+  min: getYAxisBounds(data.values, mode).min,
+  max: getYAxisBounds(data.values, mode).max,
+  ticks: {
+  color: "#8f96aa",
+  count: 5,
+  callback: value => "$" + Math.round(value / 1000) + "K"
+},
+  grid: { color: "rgba(255,255,255,0.08)" }
+}
+      }
+    }
+  });
+
+  const canvas = document.getElementById("valueChart");
+
+  canvas.onmouseleave = function() {
+    document.getElementById("portfolioValue").textContent = money(portfolioValue);
+    const dayChangeEl = document.getElementById("dayChange");
+dayChangeEl.style.visibility = "visible";
+const previousPortfolioValue = portfolioValue - fakeDayChange;
+const fakeDayPercent = (fakeDayChange / previousPortfolioValue) * 100;
+
+const arrow = fakeDayChange >= 0 ? "▲" : "▼";
+const colorClass = fakeDayChange >= 0 ? "green" : "red";
+
+const sign = fakeDayChange >= 0 ? "+" : "-";
+
+dayChangeEl.textContent =
+  "24h: " +
+  sign +
+  money(Math.abs(fakeDayChange)) +
+  " (" +
+  arrow +
+  " " +
+  Math.abs(fakeDayPercent).toFixed(2) +
+  "%)";
+
+dayChangeEl.className = "dayChange " + colorClass;
+dayChangeEl.style.color = "";
+  };
+}
+
+document.querySelectorAll(".chartMode").forEach(button => {
+  button.addEventListener("click", function() {
+    document.querySelectorAll(".chartMode").forEach(b => b.classList.remove("active"));
+    this.classList.add("active");
+    renderChart(this.dataset.mode);
+  });
+});
+
+let currentTxTypeFilter = "all";
+
+let currentSearch = "";
+
+function getFilteredTransactions() {
+  let filtered = transactions;
+
+  if (currentTxTypeFilter === "buy") {
+    filtered = filtered.filter(t => t.type === "Buy");
+  }
+
+  if (currentTxTypeFilter === "sell") {
+    filtered = filtered.filter(t => t.type === "Sell");
+  }
+
+  if (currentSearch.trim() !== "") {
+    const q = currentSearch.toLowerCase().replaceAll(",", "").trim();
+
+    filtered = filtered.filter(t => {
+      const monthShort = t.date.toLocaleDateString(undefined, { month: "short" }).toLowerCase();
+const monthLong = t.date.toLocaleDateString(undefined, { month: "long" }).toLowerCase();
+const year = t.date.getFullYear().toString();
+
+const dateText = [
+  t.date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  }).toLowerCase(),
+  monthShort + " " + year,
+  monthLong + " " + year,
+  year
+].join(" ");
+
+      const fullText = [
+        dateText,
+        t.type.toLowerCase(),
+        Math.round(t.amount).toString(),
+        t.amount.toLocaleString().replaceAll(",", ""),
+        t.price.toFixed(5),
+        money(t.total).replaceAll(",", "").toLowerCase()
+      ].join(" ");
+
+      return fullText.includes(q);
+    });
+  }
+
+  return filtered;
+}
+
+let currentPage = 1;
+const rowsPerPage = 10;
+
+function renderPagination(totalRows) {
+  const totalPages = Math.ceil(totalRows / rowsPerPage);
+  const pagination = document.getElementById("pagination");
+
+  let html = "";
+
+  html += `<div class="page" data-page="prev">Prev</div>`;
+
+  for (let i = 1; i <= Math.min(totalPages, 10); i++) {
+    html += `<div class="page ${i === currentPage ? "active" : ""}" data-page="${i}">${i}</div>`;
+  }
+
+  html += `<div class="page" data-page="next">Next</div>`;
+
+  pagination.innerHTML = html;
+}
+
+function renderTransactionTables() {
+  const filtered = getFilteredTransactions();
+
+  const start = (currentPage - 1) * rowsPerPage;
+  const end = start + rowsPerPage;
+
+  document.getElementById("allRows").innerHTML =
+filtered.slice(start, end).map(t => rowHtml(t)).join("")
+
+  renderPagination(filtered.length);
+}
+
+document.querySelectorAll(".txTypeFilter").forEach(button => {
+  button.addEventListener("click", function() {
+    document.querySelectorAll(".txTypeFilter").forEach(b => b.classList.remove("active"));
+    this.classList.add("active");
+
+    currentTxTypeFilter = this.dataset.type;
+    renderTransactionTables();
+
+
+
+  });
+});
+
+document.querySelectorAll(".page").forEach(button => {
+  button.addEventListener("click", function() {
+
+    document.querySelectorAll(".page").forEach(b =>
+      b.classList.remove("active")
+    );
+
+    this.classList.add("active");
+
+    currentPage = Number(this.textContent);
+
+    renderTransactionTables();
+
+  });
+});
+
+document.getElementById("pagination").addEventListener("click", function(e) {
+  if (!e.target.classList.contains("page")) return;
+
+  const filtered = getFilteredTransactions();
+  const totalPages = Math.ceil(filtered.length / rowsPerPage);
+  const page = e.target.dataset.page;
+
+  if (page === "prev") {
+    currentPage = Math.max(1, currentPage - 1);
+  } else if (page === "next") {
+    currentPage = Math.min(totalPages, currentPage + 1);
+  } else {
+    currentPage = Number(page);
+  }
+
+  renderTransactionTables();
+});
+
+document.querySelector(".searchBar").addEventListener("input", function() {
+  currentSearch = this.value;
+  currentPage = 1;
+  renderTransactionTables();
+});
+
+document.addEventListener("click", function(e) {
+  const row = e.target.closest(".txRow");
+  if (!row) return;
+
+  editingTxId = Number(row.dataset.id);
+const tx = transactions.find(t => t.id === editingTxId);
+if (!tx) return;
+modalMode = "edit";
+document.getElementById("txModalTitle").textContent = "Edit Transaction";
+document.getElementById("deleteTx").style.display = "";
+
+  document.getElementById("editDate").value =
+  `${tx.date.getFullYear()}-${String(tx.date.getMonth() + 1).padStart(2, "0")}-${String(tx.date.getDate()).padStart(2, "0")}`;
+  document.getElementById("editType").value = tx.type;
+  document.getElementById("editAmount").value = tx.amount;
+  document.getElementById("editPrice").value = tx.price.toFixed(5);
+
+  document.querySelectorAll(".editTypeBtn").forEach(b => b.classList.remove("active"));
+
+  if (tx.type === "Sell") {
+    document.getElementById("editSell").classList.add("active");
+  } else {
+    document.getElementById("editBuy").classList.add("active");
+  }
+
+  document.getElementById("editModal").style.display = "flex";
+
+setTimeout(() => {
+  editDatePicker.setDate(document.getElementById("editDate").value, false);
+  editDatePicker.redraw();
+}, 50);
+});
+
+document.querySelectorAll(".editTypeBtn").forEach(button => {
+  button.addEventListener("click", function() {
+    document.querySelectorAll(".editTypeBtn").forEach(b => b.classList.remove("active"));
+    this.classList.add("active");
+    document.getElementById("editType").value = this.dataset.type;
+  });
+});
+
+document.getElementById("cancelTx").addEventListener("click", function() {
+  document.getElementById("editModal").style.display = "none";
+});
+
+let editDatePicker = flatpickr("#editDate", {
+  dateFormat: "Y-m-d",
+  allowInput: false,
+  clickOpens: true,
+  monthSelectorType: "dropdown",
+  defaultDate: "today",
+  maxDate: "today"
+});
+
+document.getElementById("editDate").addEventListener("click", function() {
+  editDatePicker.open();
+});
+
+let modalMode = "edit";
+
+document.getElementById("addTx").addEventListener("click", function() {
+  modalMode = "add";
+  editingTxId = null;
+
+  document.getElementById("txModalTitle").textContent = "Add Transaction";
+
+  const today = new Date();
+  document.getElementById("editDate").value =
+    `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+
+  document.getElementById("editType").value = "Buy";
+  document.getElementById("editAmount").value = "";
+  document.getElementById("editPrice").value = CURRENT_PRICE.toFixed(5);
+
+  document.querySelectorAll(".editTypeBtn").forEach(b => b.classList.remove("active"));
+  document.getElementById("editBuy").classList.add("active");
+
+  document.getElementById("deleteTx").style.display = "none";
+  document.getElementById("editModal").style.display = "flex";
+
+setTimeout(() => {
+  editDatePicker.setDate(document.getElementById("editDate").value, false);
+  editDatePicker.redraw();
+}, 50);
+});
+
+document.getElementById("saveTx").addEventListener("click", function() {
+  const date = localDateFromInput(document.getElementById("editDate").value);
+  const type = document.getElementById("editType").value;
+  const amount = Number(document.getElementById("editAmount").value);
+  const txPrice = Number(document.getElementById("editPrice").value);
+
+  if (!date || !amount || !txPrice) return;
+if (dateOnly(date) > todayLocalDate()) {
+  alert("Future dates are not allowed.");
+  return;
+}
+
+  if (modalMode === "add") {
+    transactions.push({
+      id: transactionIdCounter++,
+      date,
+      type,
+      amount,
+      price: txPrice,
+      total: amount * txPrice
+    });
+  } else {
+    if (editingTxId === null) return;
+
+    const tx = transactions.find(t => t.id === editingTxId);
+    if (!tx) return;
+
+    tx.date = date;
+    tx.type = type;
+    tx.amount = amount;
+    tx.price = txPrice;
+    tx.total = amount * txPrice;
+  }
+
+  sortTransactionsNewestFirst();
+  recalculatePortfolioState();
+  updatePortfolioHeader();
+  renderHoldings();
+
+  document.getElementById("deleteTx").style.display = "";
+  document.getElementById("editModal").style.display = "none";
+
+  currentPage = 1;
+  renderTransactionTables();
+
+  const activeMode = document.querySelector(".chartMode.active")?.dataset.mode || "all";
+  renderChart(activeMode);
+});
+
+document.getElementById("deleteTx").addEventListener("click", function() {
+  if (editingTxId === null) return;
+  document.getElementById("deleteConfirmModal").style.display = "flex";
+});
+
+document.getElementById("cancelDeleteTx").addEventListener("click", function() {
+  document.getElementById("deleteConfirmModal").style.display = "none";
+});
+
+document.getElementById("confirmDeleteTx").addEventListener("click", function() {
+  if (editingTxId === null) return;
+
+  transactions = transactions.filter(t => t.id !== editingTxId);
+
+  editingTxId = null;
+
+  sortTransactionsNewestFirst();
+  recalculatePortfolioState();
+  updatePortfolioHeader();
+  renderHoldings();
+
+  document.getElementById("deleteConfirmModal").style.display = "none";
+  document.getElementById("editModal").style.display = "none";
+
+  currentPage = 1;
+  renderTransactionTables();
+
+  const activeMode = document.querySelector(".chartMode.active")?.dataset.mode || "all";
+  renderChart(activeMode);
+});
+
+document.getElementById("clearAllTx").addEventListener("click", function() {
+  const confirmed = confirm("Clear all transactions? This resets on refresh.");
+  if (!confirmed) return;
+
+  transactions = [];
+  editingTxId = null;
+  currentPage = 1;
+
+  recalculatePortfolioState();
+  updatePortfolioHeader();
+  renderHoldings();
+  renderTransactionTables();
+
+  const activeMode = document.querySelector(".chartMode.active")?.dataset.mode || "all";
+  renderChart(activeMode);
+});
+
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.addEventListener("click", function() {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    this.classList.add("active");
+
+    const view = this.dataset.view;
+
+    document.getElementById("overviewView").style.display = view === "overview" ? "" : "none";
+    document.getElementById("holdingsView").style.display = view === "holdings" ? "" : "none";
+    document.getElementById("unnamed1View").style.display = view === "unnamed1" ? "" : "none";
+    document.getElementById("unnamed2View").style.display = view === "unnamed2" ? "" : "none";
+
+    if (view === "holdings") {
+      renderHoldings();
+    }
+  });
+});
+
+renderTransactionTables();
+renderHoldings();
+renderChart("all");
+</script>
+
+</body>
+</html>
